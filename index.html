@@ -8,13 +8,17 @@
 
       <!-- Load the page styles. -->
     <link href="css/style.css" rel="stylesheet" type="text/css">
-
     <script src="js/lib/knockout-3.3.0.js"></script>
-    <script src = "js/app.js"></script></script>
-    <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=initMap"></script>
+    <script src ="js/app.js"></script>
+
+    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=initMap"></script>
 </head>
-<body>
+<body >
     <header></header>
+    <div>
+        <input id="address" type="textbox" value="Encino, CA 91346">
+        <input type="button" value="Encode" onclick="codeAddress()">
+    </div>
     <form id="map-search">
         <fieldset>
             <legend>Search</legend>
@@ -22,12 +26,10 @@
         </fieldset>
     </form>
 
-    <ul id="my-list" >
+    <ul id="my-list">
         <li >test</li>
     </ul>
-    <div id="map">    </div>
-
-
+    <div id="map"></div>
     <footer> </footer>
 </body>
 </html>
