@@ -2,17 +2,18 @@ var geocoder;
 var map;
 var userLocation; //need to query that one
 
-var YELP_KEY = "zlSHMTd6jFsZDtRz_xLTKg";
-var YELP_KEY_SECRET = "h0q1qcYo0NZlf8QYVgLnmFiJ_qM";
-var YELP_TOKEN = "DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6";
-var YELP_TOKEN_SECRET = "Z1lKnImH7eodJHFIo6yQtuE_ARI";
 
 function obtainYelpBrewpubList(){
     var YELP_BASE_URL = 'http://api.yelp.com/v2/search'
+    var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
+    var YELP_KEY_SECRET = 'h0q1qcYo0NZlf8QYVgLnmFiJ_qM';
+    var YELP_TOKEN = 'DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6';
+    var YELP_TOKEN_SECRET = 'Z1lKnImH7eodJHFIo6yQtuE_ARI';
+
     var yelp_url = YELP_BASE_URL;
-    var yelpRequestTimeout = setTimeout(function(){
-        $yelpElem.text("failed to get yelp resources");
-    }, 8000);
+    //var yelpRequestTimeout = setTimeout(function(){
+    //    $yelpElem.text("failed to get yelp resources");
+    //}, 8000);
     var nonce_generate = Math.floor(Math.random() * 1e12).toString();
 
     var parameters = {
@@ -22,16 +23,15 @@ function obtainYelpBrewpubList(){
         oauth_timestamp: Math.floor(Date.now()/1000),
         oauth_signature_method: 'HMAC-SHA1',
         oauth_version : '1.0',
-        location: 'Encino CA',
-        term: 'brewpub',
-        limit: 1,
-        callback: 'cb'              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+        callback: 'cb',              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+        location: 'San Diego,CA',
+        term: 'brew pub'
     };
 
     var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
     parameters.oauth_signature = encodedSignature;
     //Debug
-    console.log("obtaining encodedSignature:"+encodedSignature);
+    //console.log("obtaining encodedSignature:"+encodedSignature);
 
     var settings = {
         url: yelp_url,
@@ -39,14 +39,25 @@ function obtainYelpBrewpubList(){
         cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
         dataType: 'jsonp',
         success: function(results) {
-        //dostuff
-        //Debug
+            //dostuff
+            console.log("works");
+            var bizname = results.businesses.name;
+            var bizurl = results.businesses.url;
+
+            console.log(results.businesses);
+            //$yelpElem.append('<li>bizname</li>');
+            //Debug
         },
         error:function(jqXHR, textStatus, errorThrown) {
-        //dostuff
+            //dostuff
+            console.log("error");
         }
-    };    
-    $.ajax.settings;
+    };
+    //console.log(yelp_url, settings.data);
+
+    $.ajax(settings);
+
+
 };
 
 
@@ -54,12 +65,14 @@ function obtainYelpBrewpubList(){
 function initMap() {
 
     geocoder = new google.maps.Geocoder();
-    var latlng = new google.maps.LatLng(34.1592, -118.5003);
+    //var latlng = new google.maps.LatLng(34.1592, -118.5003);
+    var latlng = new google.maps.LatLng(32.7150, -117.1625);
+
     var locations;
     var infoWindow = new google.maps.InfoWindow({map: map});
     var mapOptions = {
-        center: {lat: 34.1592, lng: -118.5003},
-        zoom: 13,
+        center: {lat: 32.7150, lng: -117.1625},
+        zoom: 12,
         //center: latlng,
         //disableDefaultUI: true
     };
@@ -128,7 +141,6 @@ function initMap() {
 function codeAddress(){
     var address = document.getElementById("address").value;
     console.log(address);
-    console.log(geocoder);
     geocoder.geocode( { 'address': address}, function(results, status) {
       if (status == google.maps.GeocoderStatus.OK) {
         map.setCenter(results[0].geometry.location);
@@ -141,3 +153,5 @@ function codeAddress(){
       }
     });
 };
+
+function testb(){console.log("testbutton")};
