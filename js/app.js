@@ -1,10 +1,17 @@
 var geocoder;
 var map;
 var userLocation; //need to query that one
+var brewpubList;
 
+function obtainBreweryDbList(){
+    var BREWDB_API_KEY = '74af3055e27da905ea8c2332cb03290d';
+    var brew_query = '/search?q=';
+    var brew_queryType = '&type=brewery';
 
+    var brewLocation = 'San Diego';
+};
 function obtainYelpBrewpubList(){
-    var YELP_BASE_URL = 'http://api.yelp.com/v2/search'
+    var YELP_BASE_URL = 'http://api.yelp.com/v2/search';
     var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
     var YELP_KEY_SECRET = 'h0q1qcYo0NZlf8QYVgLnmFiJ_qM';
     var YELP_TOKEN = 'DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6';
@@ -25,7 +32,8 @@ function obtainYelpBrewpubList(){
         oauth_version : '1.0',
         callback: 'cb',              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
         location: 'San Diego,CA',
-        term: 'brew pub'
+        term: 'brew pub',
+        limit: '10'
     };
 
     var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
@@ -40,11 +48,12 @@ function obtainYelpBrewpubList(){
         dataType: 'jsonp',
         success: function(results) {
             //dostuff
-            console.log("works");
+            console.log("works!");
+            brewpubList = results.businesses;
             var bizname = results.businesses.name;
-            var bizurl = results.businesses.url;
 
-            console.log(results.businesses);
+            console.log(brewpubList);
+            console.log(brewpubList[0].name,brewpubList[0].location.coordinate);
             //$yelpElem.append('<li>bizname</li>');
             //Debug
         },
