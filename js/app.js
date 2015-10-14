@@ -5,10 +5,32 @@ var brewpubList;
 
 function obtainBreweryDbList(){
     var BREWDB_API_KEY = '74af3055e27da905ea8c2332cb03290d';
-    var brew_query = '/search?q=';
-    var brew_queryType = '&type=brewery';
+    var BREWDB_BASE_URL = 'http://api.brewerydb.com/v2/?key='
+    var brewdbSearch = '/search?q='
+    var brewdbQueryType = '&type=brewery';
 
-    var brewLocation = 'San Diego';
+    var brewdbLocation = 'San Diego';
+
+};
+
+function obtainNytimesArticles(){
+    var NYTIMES_API_KEY ='40257ad2896f85cc4647f58de8572b74:4:12077278';
+    var testBrewery = 'Ballast Point Brewery'
+    var NTYIMES_URL = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?q='+ testBrewery + '&sort=newest&api-key=' + NYTIMES_API_KEY;
+    var $nytHeaderElem = $('#nytimes-header');
+    var $nytElem = $('#nytimes-articles');
+
+    $.getJSON( NTYIMES_URL, function( data ) {
+        $nytHeaderElem.text("New York Times Articles About" + testBrewery);
+        articles = data.response.docs;
+        for (var i = 0; i < articles.length; i++) {
+            var article = articles[i];
+            $nytElem.append('<li class="article">' + '<a href="' + article.web_url+'">' +article.headline.main + '</a>' + '<p>' + article.snippet + '</p>' + '</li>');
+        };
+    }).error(function(e){
+        $nytHeaderElem.text('New York Times Article could not be loaded')
+    });
+
 };
 function obtainYelpBrewpubList(){
     var YELP_BASE_URL = 'http://api.yelp.com/v2/search';

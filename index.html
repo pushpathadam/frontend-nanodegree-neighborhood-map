@@ -20,8 +20,8 @@
     <div>
         <input id="address" type="textbox" value="San Diego, CA ">
         <input type="button" value="Encode" onclick="codeAddress()">
-        <input type="button" value="TestYelp" onclick=" obtainYelpBrewpubList()">
-        <input type="button" value="TestButton" onclick=" testb()">
+        <input type="button" value="TestYelp" onclick="obtainYelpBrewpubList()">
+        <input type="button" value="TestButton" onclick="obtainNytimesArticles()">
 
     </div>
     <form id="map-search">
@@ -38,6 +38,10 @@
     <ul id="yelpElem">
         <li >Item</li>
     </ul>
+    <div class="nytimes-container">
+        <h3 id="nytimes-header">New York Times Articles</h3>
+        <ul id="nytimes-articles" class="article-list">What's going on in your new city? Enter an address and hit submit and the NY Times will tell you here!</ul>
+    </div>
 
     <footer> </footer>
 </body>
