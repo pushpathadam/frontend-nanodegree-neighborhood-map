@@ -19,42 +19,55 @@
 </head>
 <body >
     <header></header>
+    <h1>Brewpub Finder Demo</h1>
+    <!-- List of Brewpubs and Search Box-->
+    <div class="list-container" data-bind="with: listViewModel">
+        <h2>listViewModel</h2>
 
-    <div>
-        <h2>Looking for a Brewpub in  <span data-bind='text: processedLocation'> </span>!</h2>
+        <h3> Search Box</h3>
 
-        <!--<input id="address" data-bind="textInput: searchArea" autocomplete="off"></input>-->
-        <input id="address" type="textbox" value="San Diego, CA ">
-        <input type="button" value="TestGoogleGeoFinder" onclick="codeAddress()"></input>
-        <input type="button" value="TestYelp" onclick="obtainYelpBrewpubList()"></input>
-        <input type="button" value="TestNytimes" onclick="obtainNytimesArticles()"></input>
-    </div>
-    <div class="search-container">
         <form id="map-search">
             <fieldset>
                 <legend>Search</legend>
-                <label>Name  &nbsp<input type="text" name="name" /></label>
+                <label>Name  &nbsp<input type = "search" data-bind="textInput: query, valueUpdate: 'keyup'" /></label>
             </fieldset>
         </form>
-    </div>
-    <div class="list-container">
-        <h3 id="list-header">Brewpub List</h3>
-        <ul id="brewpub-list" data-bind="foreach:brewpubList">
-            <li data-bind="text: name, click: x"></li>
+
+        <h3>I'm searching for <span data-bind='text: query'></span></h3>
+
+        <h3>A List of Available Bodies from which I select a string <span data-bind='text: selection'></span></h3>
+        <h3>or an object <span data-bind='text: chosenOne()'></span></h3>
+
+        <ul id="my-list" data-bind="foreach: availableBodies">
+            <li data-bind="text: name, click: $parent.clickedBody"></li>
         </ul>
-    </div>
-    <div id="map-canvas"></div>
-    <div class = "yelp-container">
-        <h3 id="yelp-header">Yelp Reviews</h3>
-        <ul id="yelp-elem">
-            <li >Item</li>
+
+        <h3>Visible Bodies containing query string <span data-bind='text: query'></span></h3>
+        <h3>In <span data-bind='text: search()'></span></h3>
+
+        <ul id="my-list2" data-bind="foreach: search()">
+            <li data-bind="text: name, click: $parent.clickedBody"></li>
         </ul>
-    </div>
-    <div class="nytimes-container">
-        <h3 id="nytimes-header">New York Times Articles</h3>
-        <ul id="nytimes-articles" class="article-list">What's going on in your new city? Enter an address and hit submit and the NY Times will tell you here!</ul>
     </div>
 
+    <!-- Compartmentalized ViewModel for Google Maps-->
+    <div class="map-container">
+        <h2>googleMapsViewModel</h2>
+
+        <!--  Google Map Placeholder-->
+        <div id="map-canvas"></div>
+    </div>
+
+    <!-- Compartmentalized DetailsViewModel -->
+    <!-- Details of the selected Brewpub pulled from Yelp-->
+    <div class="search-container"data-bind="with: detailsViewModel">
+        <h2>detailsViewModel</h2>
+
+        <h3>I'm looking for <span data-bind='text: chosenOne()'></span></h3>
+        <p>Brew Pub Name: <span data-bind='text: pubName()'></span></p>
+    </div>
+
+    <!-- Scripts-->
     <script src ="js/lib/oauth-signature.min.js"></script>
     <!--
     <script src ="js/lib/jquery-1.11.3.min.js"></script>
@@ -62,8 +75,6 @@
     -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-
-    <!--<pre data-bind="text: ko.toJson($root, null,1)"></pre>-->
     <script src ="js/model.js"></script>
     <script src ="js/app.js"></script>
     <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>

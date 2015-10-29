@@ -1,9 +1,167 @@
+//Globals
+var map;
+//var geocoder; //only if we query user location
 var allMarkers=[];
-var userLocation; //need to query that one
+//var userLocation; //need to query that one
 var brewpubList;
 
-var geocoder;
-var map;
+var chosenOne = ko.observableArray([]); //may keep as a temp
+var query = ko.observable("");
+
+
+var visibleBodies = ko.observableArray([]);
+
+function person(name) {
+    var self = this;
+    self.name = name;
+    self.flower = "poinsetta";
+    //self.visible = ko.observable(true);
+    //self.selected = ko.observable(false);
+};
+
+// ListViewModel
+function ListViewModel(){
+    console.log("in ListViewModel");
+
+    var self = this;
+    self.selection = ko.observable("Nobody Yet1!");
+
+    // some data temp
+    self.posse = [
+        {nickname: "Karl Strauss Brewing Company"},
+        {nickname: "Monkey Paw"},
+        {nickname: "Ballast Point"}
+    ];
+
+    self.availableBodies = ko.observableArray([
+        new person(self.posse[0].nickname),
+        new person(self.posse[1].nickname),
+        new person(self.posse[2].nickname),
+    ]);
+
+
+    self.search =  ko.computed(function(){
+        self.tempBodies = self.availableBodies.slice(0);
+        if (query().length < 1) {
+            //console.log("here1",self.tempBodies);
+            return self.tempBodies;
+        } else {
+            self.tempBodies = [];
+            for (var i =0; i < self.availableBodies().length ;i++){
+                var temp = self.availableBodies()[i].name.toLowerCase();
+                // Note this test is case sensitive
+                if ((query().length > 0) && (temp.search(query().toLowerCase()) > -1)){
+                    //console.log(query(),temp);
+
+                    self.tempBodies.push(self.availableBodies()[i]);
+                 };
+            };
+            //console.log("here2",self.tempBodies);
+            return self.tempBodies;
+        }
+    });
+
+    self.clickedBody= function(i) {
+        console.log("clicked",i.name);
+        chosenOne.pop();
+        chosenOne.push(i.name);
+
+        //why is this one not working?
+        self.selection("");
+        self.selection(i.name);
+        console.log("result", chosenOne()[0],"or",self.selection());
+    };
+
+};
+
+// DetailsViewModel
+function DetailsViewModel(){
+    console.log("in DetailsViewModel");
+    var self=this;
+
+    self.detailsResults = ko.observable();
+
+    self.pubName = ko.observable("test");
+    self.img = ko.observable();
+    self.ph  = ko.observable();
+    self.url = ko.observable();
+    self.stars = ko.observable();
+    self.rating = ko.observable();
+    self.snippet = ko.observable();
+
+    self.getDetails = ko.computed(function(){
+        var YELP_BASE_URL = 'http://api.yelp.com/v2/search';
+        var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
+        var YELP_KEY_SECRET = 'h0q1qcYo0NZlf8QYVgLnmFiJ_qM';
+        var YELP_TOKEN = 'DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6';
+        var YELP_TOKEN_SECRET = 'Z1lKnImH7eodJHFIo6yQtuE_ARI';
+
+        var yelp_url = YELP_BASE_URL;
+        //var yelpRequestTimeout = setTimeout(function(){
+        //    $yelp-elem.text("failed to get yelp resources");
+        //}, 8000);
+        var nonce_generate = Math.floor(Math.random() * 1e12).toString();
+
+        var parameters = {
+            oauth_consumer_key: YELP_KEY,
+            oauth_token: YELP_TOKEN,
+            oauth_nonce: nonce_generate,
+            oauth_timestamp: Math.floor(Date.now()/1000),
+            oauth_signature_method: 'HMAC-SHA1',
+            oauth_version : '1.0',
+            callback: 'cb',              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+            term: chosenOne()[0],       // This might push an evaluation?
+            location: "San Diego, CA",
+            limit: '1'
+        };
+
+        var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
+
+        parameters.oauth_signature = encodedSignature;
+        //Debug
+        //console.log("obtaining encodedSignature:"+encodedSignature);
+
+        var settings = {
+            url: yelp_url,
+            data: parameters,
+            cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
+            dataType: 'jsonp',
+            success: function(results) {
+                //dostuff
+
+                    console.log("works!");
+                    self.detailsResults(results.businesses[0]);
+                    console.log(self.detailsResults());
+                    console.log(self.detailsResults().name, self.detailsResults().location.coordinate);
+
+                    //self.pubName = self.detailsResults.name;
+                    self.pubName(results.businesses[0].name);
+                    self.img(results.businesses[0].image_url);
+                    self.ph(results.businesses[0].display_phone);
+                    self.url(results.businesses[0].url);
+                    self.stars(results.businesses[0].rating_img_url_small);
+                    self.rating(results.businesses[0].rating);
+                    self.snippet(results.businesses[0].snippet_text);
+                    console.log("pubname",self.pubName());
+
+
+            },
+            error:function(jqXHR, textStatus, errorThrown) {
+                //dostuff
+                // need message sorry couldnt find any info on this business on yelp
+                console.log("error");
+            }
+        };
+
+        //console.log(yelp_url, settings.data);
+        // tests if anything is selected before ajax call
+        if (chosenOne()[0] != null) {
+            $.ajax(settings);
+        };
+    });
+
+};
+
 
 
 
@@ -41,72 +199,11 @@ function obtainNytimesArticles(){
 };
 */
 
-/*
-function obtainYelpBrewpubList(){
-    var YELP_BASE_URL = 'http://api.yelp.com/v2/search';
-    var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
-    var YELP_KEY_SECRET = 'h0q1qcYo0NZlf8QYVgLnmFiJ_qM';
-    var YELP_TOKEN = 'DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6';
-    var YELP_TOKEN_SECRET = 'Z1lKnImH7eodJHFIo6yQtuE_ARI';
-
-    var yelp_url = YELP_BASE_URL;
-    //var yelpRequestTimeout = setTimeout(function(){
-    //    $yelp-elem.text("failed to get yelp resources");
-    //}, 8000);
-    var nonce_generate = Math.floor(Math.random() * 1e12).toString();
-
-    var parameters = {
-        oauth_consumer_key: YELP_KEY,
-        oauth_token: YELP_TOKEN,
-        oauth_nonce: nonce_generate,
-        oauth_timestamp: Math.floor(Date.now()/1000),
-        oauth_signature_method: 'HMAC-SHA1',
-        oauth_version : '1.0',
-        callback: 'cb',              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
-        location: 'San Diego,CA',
-        term: 'brew pub',
-        limit: '10'
-    };
-
-    var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
-    parameters.oauth_signature = encodedSignature;
-    //Debug
-    //console.log("obtaining encodedSignature:"+encodedSignature);
-
-    var settings = {
-        url: yelp_url,
-        data: parameters,
-        cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
-        dataType: 'jsonp',
-        success: function(results) {
-            //dostuff
-            console.log("works!");
-            brewpubList = results.businesses;
-            var bizname = results.businesses.name;
-
-            console.log(brewpubList);
-            console.log(brewpubList[0].name,brewpubList[0].location.coordinate);
-            //$yelp-elem.append('<li>bizname</li>');
-            //Debug
-        },
-        error:function(jqXHR, textStatus, errorThrown) {
-            //dostuff
-            console.log("error");
-        }
-    };
-    //console.log(yelp_url, settings.data);
-
-    $.ajax(settings);
-
-
-};
-*/
 
 
 
-function googleError() {
-    console.log("google maps didn't load");
-}
+
+
 /*
 function codeAddress(temp){
     //var address = document.getElementById("address").value;
@@ -163,7 +260,8 @@ function initInfoWindow(marker){
 
 function testb(){console.log("testbutton")};
 
-var ViewModel = function(city){
+// GoogleMapViewModel
+function GoogleMapViewModel(city){
 
     // self is the viewModels
     // pointer for keeping outer this separate from inner this
@@ -232,7 +330,12 @@ var mapAppearance = function(){
         }
     ]);
 };
-
+ 
+function masterVM() {
+    this.mapViewModel = new GoogleMapViewModel(initialLocation)
+    this.listViewModel = new ListViewModel();
+    this.detailsViewModel = new DetailsViewModel();
+};
 
 function googleSuccess() {
 
@@ -240,8 +343,8 @@ function googleSuccess() {
     // Seems weird to apply apply view model bindings last but this puts it safely after google loads async
     if (typeof google==='object' && typeof google.maps ==='object'){
 
-        ko.applyBindings(new ViewModel(initialLocation));
-
+        //ko.applyBindings(new ViewModel(initialLocation));
+        ko.applyBindings(new masterVM());
         mapAppearance();
 
 
@@ -295,3 +398,6 @@ function googleSuccess() {
     };
     */
 };
+function googleError() {
+    console.log("google maps didn't load");
+}
