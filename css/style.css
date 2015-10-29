@@ -1,4 +1,4 @@
 /* for google maps */
 
 html, body { height: 100%; margin: 0; padding: 0; }
-#map { height: 100%; }
+#map-canvas { height: 400px; }

@@ -1,8 +1,13 @@
-var geocoder;
-var map;
+var allMarkers=[];
 var userLocation; //need to query that one
 var brewpubList;
 
+var geocoder;
+var map;
+
+
+
+/*
 function obtainBreweryDbList(){
     var BREWDB_API_KEY = '74af3055e27da905ea8c2332cb03290d';
     var BREWDB_BASE_URL = 'http://api.brewerydb.com/v2/?key='
@@ -12,7 +17,9 @@ function obtainBreweryDbList(){
     var brewdbLocation = 'San Diego';
 
 };
+*/
 
+/*
 function obtainNytimesArticles(){
     var NYTIMES_API_KEY ='40257ad2896f85cc4647f58de8572b74:4:12077278';
     var testBrewery = 'Ballast Point Brewery'
@@ -32,6 +39,9 @@ function obtainNytimesArticles(){
     });
 
 };
+*/
+
+/*
 function obtainYelpBrewpubList(){
     var YELP_BASE_URL = 'http://api.yelp.com/v2/search';
     var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
@@ -41,7 +51,7 @@ function obtainYelpBrewpubList(){
 
     var yelp_url = YELP_BASE_URL;
     //var yelpRequestTimeout = setTimeout(function(){
-    //    $yelpElem.text("failed to get yelp resources");
+    //    $yelp-elem.text("failed to get yelp resources");
     //}, 8000);
     var nonce_generate = Math.floor(Math.random() * 1e12).toString();
 
@@ -76,7 +86,7 @@ function obtainYelpBrewpubList(){
 
             console.log(brewpubList);
             console.log(brewpubList[0].name,brewpubList[0].location.coordinate);
-            //$yelpElem.append('<li>bizname</li>');
+            //$yelp-elem.append('<li>bizname</li>');
             //Debug
         },
         error:function(jqXHR, textStatus, errorThrown) {
@@ -90,29 +100,123 @@ function obtainYelpBrewpubList(){
 
 
 };
+*/
 
 
 
-function initMap() {
-
-    geocoder = new google.maps.Geocoder();
-    //var latlng = new google.maps.LatLng(34.1592, -118.5003);
-    var latlng = new google.maps.LatLng(32.7150, -117.1625);
-
-    var locations;
-    var infoWindow = new google.maps.InfoWindow({map: map});
-    var mapOptions = {
-        center: {lat: 32.7150, lng: -117.1625},
-        zoom: 12,
-        //center: latlng,
-        //disableDefaultUI: true
+function googleError() {
+    console.log("google maps didn't load");
+}
+/*
+function codeAddress(temp){
+    //var address = document.getElementById("address").value;
+    var address = temp;
+    console.log("in CodeAddress:", address);
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        map.setCenter(results[0].geometry.location);
+        var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+        });
+      } else {
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+};
+*/
+function brewpub(ibrewery){
+    var self = this;
+    self.name = ibrewery.id;
+    self.lat = ibrewery.location.coordinate.latitude;
+    self.lng = ibrewery.location.coordinate.longitude;
+    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
+    self.infoWindow = new google.maps.InfoWindow({
+        content: self.contentString
+        });
+    self.marker = function(){
+        return new google.maps.Marker({
+            map: map,
+            position: new google.maps.LatLng(self.lat, self.lng),
+            title: self.name
+        })
     };
 
-    // This next line makes `map` a new Google Map JavaScript Object and attaches it to
-    // <div id="map">, which is appended as part of an exercise late in the course.
-    map = new google.maps.Map(document.getElementById('map'),mapOptions);
+    //Draw marker
+    self.marker();
+    //turn marker off
+    //self.marker().setVisible(false);
+    self.infoWindow.open(map, self.marker());
+};
 
-    // Adjusted color of the map to a more monochrome look
+function initInfoWindow(marker){
+
+    //var infoWindowContainer {
+    //    contentString = '<div class="content">'+
+    //        ibrewery.name +
+    //        '</div>';
+    //}
+    //infoWindow.setContent(infoWindowContainer);
+
+    //infoWindow.open(marker.getMap(), marker);
+};
+
+function testb(){console.log("testbutton")};
+
+var ViewModel = function(city){
+
+    // self is the viewModels
+    // pointer for keeping outer this separate from inner this
+    var self = this;
+    self.latlng = new google.maps.LatLng(city.location.lat, city.location.lng);
+    self.mapOptions = {
+        center: {lat: city.location.lat, lng: city.location.lng},
+        zoom: 12,
+    };
+
+    //creating global map
+    map = new google.maps.Map(document.getElementById('map-canvas'),this.mapOptions);
+
+
+    // observables
+    // want to update search area
+
+    self.searchArea= ko.observable(city.place);
+    self.processedLocation = ko.computed(function(){
+        return self.searchArea()+" here";
+    },self);
+
+    // build editable list of brewpubs
+    // brewery markers
+    self.brewpubList = ko.observableArray([]);
+    for (var i = 0; i < initialBrewpubs.length; i++){
+        self.brewpubList.push(new brewpub(initialBrewpubs[i]))
+    }
+
+    //operations on brewpub list
+
+    //current or selected brewpub
+    // need to be connected to maps
+    // need to be pushed out to details window
+    self.currentBrewpub = ko.observable(self.brewpubList()[0]);
+
+
+    self.setBrewpub =function(clickedBrewpub){
+        self.currentBrewpub(clickedBrewpub);
+    };
+
+    // list of brewpubs that match search query
+    self.xBrewpub = function(clickedBrewpub){
+        console.log("xBrewpup");
+    };
+
+    // hide brewpubs
+    // show brewpubs
+};
+
+
+var mapAppearance = function(){
+    // To move Adjusted color of the global map to a more monochrome look
     map.set('styles',[
         {
             "stylers": [
@@ -127,18 +231,41 @@ function initMap() {
             ]
         }
     ]);
+};
+
+
+function googleSuccess() {
+
+    // geocoder = new google.maps.Geocoder();
+    // Seems weird to apply apply view model bindings last but this puts it safely after google loads async
+    if (typeof google==='object' && typeof google.maps ==='object'){
+
+        ko.applyBindings(new ViewModel(initialLocation));
+
+        mapAppearance();
+
+
+
+
+    } else {
+                // google maps didn't load
+                console.log("google maps didn't load");
+    };
 
     // Sets the boundaries of the map based on pin locations
     //window.mapBounds = new google.maps.LatLngBounds();
 
       // locations is an array of location strings returned from locationFinder()
 
-      // Try HTML5 geolocation.
 
+
+    // Try HTML5 geolocation.
     // Note: This example requires that you consent to location sharing when
     // prompted by your browser. If you see the error "The Geolocation service
     // failed.", it means you probably did not give permission for the browser to
     // locate you.
+
+    /*
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
           var pos = {
@@ -166,23 +293,5 @@ function initMap() {
                             'Error: The Geolocation service failed.' :
                             'Error: Your browser doesn\'t support geolocation.');
     };
+    */
 };
-
-
-function codeAddress(){
-    var address = document.getElementById("address").value;
-    console.log(address);
-    geocoder.geocode( { 'address': address}, function(results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-        map.setCenter(results[0].geometry.location);
-        var marker = new google.maps.Marker({
-            map: map,
-            position: results[0].geometry.location
-        });
-      } else {
-        alert("Geocode was not successful for the following reason: " + status);
-      }
-    });
-};
-
-function testb(){console.log("testbutton")};

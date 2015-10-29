@@ -8,40 +8,53 @@
 
       <!-- Load the page styles. -->
     <link href="css/style.css" rel="stylesheet" type="text/css">
-    <script src="js/lib/knockout-3.3.0.js"></script>
-    <script src ="js/lib/oauth-signature.min.js"></script>
-    <script src ="js/lib/jquery-1.11.3.min.js"></script>
 
-    <script src ="js/app.js"></script>
-    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=initMap"></script>
 </head>
 <body >
     <header></header>
+
     <div>
+        <h2>Looking for a Brewpub in  <span data-bind='text: processedLocation'> </span>!</h2>
+
+        <!--<input id="address" data-bind="textInput: searchArea" autocomplete="off"></input>-->
         <input id="address" type="textbox" value="San Diego, CA ">
-        <input type="button" value="Encode" onclick="codeAddress()">
-        <input type="button" value="TestYelp" onclick="obtainYelpBrewpubList()">
-        <input type="button" value="TestButton" onclick="obtainNytimesArticles()">
-
+        <input type="button" value="TestGoogleGeoFinder" onclick="codeAddress()"></input>
+        <input type="button" value="TestYelp" onclick="obtainYelpBrewpubList()"></input>
+        <input type="button" value="TestNytimes" onclick="obtainNytimesArticles()"></input>
     </div>
-    <form id="map-search">
-        <fieldset>
-            <legend>Search</legend>
-            <label>Name  &nbsp<input type="text" name="name" /></label>
-        </fieldset>
-    </form>
-
-    <ul id="my-list">
-        <li >test</li>
-    </ul>
-    <div id="map"></div>
-    <ul id="yelpElem">
-        <li >Item</li>
-    </ul>
+    <div class="search-container">
+        <form id="map-search">
+            <fieldset>
+                <legend>Search</legend>
+                <label>Name  &nbsp<input type="text" name="name" /></label>
+            </fieldset>
+        </form>
+    </div>
+    <div class="list-container">
+        <h3 id="list-header">Brewpub List</h3>
+        <ul id="brewpub-list" data-bind="foreach:brewpubList">
+            <li data-bind="text: name, click: x"></li>
+        </ul>
+    </div>
+    <div id="map-canvas"></div>
+    <div class = "yelp-container">
+        <h3 id="yelp-header">Yelp Reviews</h3>
+        <ul id="yelp-elem">
+            <li >Item</li>
+        </ul>
+    </div>
     <div class="nytimes-container">
         <h3 id="nytimes-header">New York Times Articles</h3>
         <ul id="nytimes-articles" class="article-list">What's going on in your new city? Enter an address and hit submit and the NY Times will tell you here!</ul>
     </div>
+
+    <script src ="js/lib/oauth-signature.min.js"></script>
+    <script src ="js/lib/jquery-1.11.3.min.js"></script>
+    <script src="js/lib/knockout-3.3.0.js"></script>
+    <!--<pre data-bind="text: ko.toJson($root, null,1)"></pre>-->
+    <script src ="js/model.js"></script>
+    <script src ="js/app.js"></script>
+    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
 
     <footer> </footer>
 </body>
