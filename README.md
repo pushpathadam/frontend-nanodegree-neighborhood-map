@@ -71,6 +71,10 @@ https://discussions.udacity.com/t/major-issue-with-knockout-and-filtering/33622
 https://discussions.udacity.com/t/solved-cors-problem-alternative-to-jsonp/35658/6
 https://discussions.udacity.com/t/filtering-google-maps-markers-with-list-view/34660
 https://discussions.udacity.com/t/trouble-in-data-bind-when-the-map-is-added/30557/2
+https://discussions.udacity.com/t/how-do-you-keep-your-google-api-key-secret/9691/4
+https://discussions.udacity.com/t/api-keys-stored-in-repositories/3677
+https://discussions.udacity.com/t/yelp-api-ajax-request/15747/9
+https://help.github.com/articles/remove-sensitive-data/
 
 ### Cross Domain Issues & YQL Hack
 http://makina-corpus.com/blog/metier/2013/dealing-with-cross-domain-issues

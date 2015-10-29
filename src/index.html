@@ -5,10 +5,17 @@
     <meta charset="UTF-8">
     <title>Neighborhood Map</title>
     <!-- Customized fonts -->
-
-      <!-- Load the page styles. -->
+    <!-- Load the page styles. -->
+     <style>
+        #map-canvas { height: 400px; }
+        li {color: blue;}
+        li:hover {color: red;}
+    </style>
+    <!--
     <link href="css/style.css" rel="stylesheet" type="text/css">
-
+    -->
+    <!-- Load the api keys not in github repository -->
+    <script src ="js/keys.js"></script>
 </head>
 <body >
     <header></header>
@@ -49,12 +56,17 @@
     </div>
 
     <script src ="js/lib/oauth-signature.min.js"></script>
+    <!--
     <script src ="js/lib/jquery-1.11.3.min.js"></script>
     <script src="js/lib/knockout-3.3.0.js"></script>
+    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+
     <!--<pre data-bind="text: ko.toJson($root, null,1)"></pre>-->
     <script src ="js/model.js"></script>
     <script src ="js/app.js"></script>
-    <script async defer src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
+    <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
 
     <footer> </footer>
 </body>
