@@ -36,9 +36,10 @@
         <h3>I'm searching for <span data-bind='text: query'></span></h3>
 
         <h3>A List of Available Bodies from which I select a string <span data-bind='text: selection'></span></h3>
+        <!--
         <h3>or an object <span data-bind='text: chosenOne()'></span></h3>
-
-        <ul id="my-list" data-bind="foreach: availableBodies">
+        -->
+        <ul id="my-list" data-bind="foreach: allBrewpubs">
             <li data-bind="text: name, click: $parent.clickedBody"></li>
         </ul>
 
@@ -63,8 +64,15 @@
     <div class="search-container"data-bind="with: detailsViewModel">
         <h2>detailsViewModel</h2>
 
-        <h3>I'm looking for <span data-bind='text: chosenOne()'></span></h3>
+        <h3>I'm looking for <span data-bind='text: selection'></span></h3>
         <p>Brew Pub Name: <span data-bind='text: pubName()'></span></p>
+        <img data-bind='attr: {src: img()}'></img>
+        <p> phone: <span data-bind='text: ph()'></span></p>
+        <p> website: <span data-bind='text:url()'></span></p>
+        <p> stars: <span data-bind='text:stars()'></span></p>
+        <p> rating: <span data-bind='text:rating()'></span></p>
+        <p> snippet: <span data-bind='text:snippet()'></span></p>
+
     </div>
 
     <!-- Scripts-->

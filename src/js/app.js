@@ -7,9 +7,12 @@ var brewpubList;
 
 var chosenOne = ko.observableArray([]); //may keep as a temp
 var query = ko.observable("");
+var selection = ko.observable("");
 
 
 var visibleBodies = ko.observableArray([]);
+var allBrewpubs = ko.observableArray([]);
+
 
 function person(name) {
     var self = this;
@@ -19,57 +22,76 @@ function person(name) {
     //self.selected = ko.observable(false);
 };
 
+function brewpub(ibrewery){
+    var self = this;
+    self.name = ibrewery.name;
+    self.lat = ibrewery.location.coordinate.latitude;
+    self.lng = ibrewery.location.coordinate.longitude;
+    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
+    self.infoWindow = new google.maps.InfoWindow({
+        content: self.contentString
+        });
+    self.marker = function(){
+        return new google.maps.Marker({
+            map: map,
+            position: new google.maps.LatLng(self.lat, self.lng),
+            title: self.name
+        })
+    };
+
+    //Draw marker
+    self.marker();
+    //turn marker off
+    //self.marker().setVisible(false);
+    self.infoWindow.open(map, self.marker());
+};
+
+
 // ListViewModel
 function ListViewModel(){
     console.log("in ListViewModel");
 
     var self = this;
-    self.selection = ko.observable("Nobody Yet1!");
 
-    // some data temp
-    self.posse = [
-        {nickname: "Karl Strauss Brewing Company"},
-        {nickname: "Monkey Paw"},
-        {nickname: "Ballast Point"}
-    ];
+    for (var i = 0; i < initialBrewpubs.length; i++){
+            allBrewpubs.push(new brewpub(initialBrewpubs[i]))
+    };
 
-    self.availableBodies = ko.observableArray([
-        new person(self.posse[0].nickname),
-        new person(self.posse[1].nickname),
-        new person(self.posse[2].nickname),
-    ]);
 
 
     self.search =  ko.computed(function(){
-        self.tempBodies = self.availableBodies.slice(0);
+        //self.tempBodies = self.availableBodies.slice(0);
+        self.tempBrewpub = allBrewpubs.slice(0);
         if (query().length < 1) {
             //console.log("here1",self.tempBodies);
-            return self.tempBodies;
+            //return self.tempBodies;
+            return self.tempBrewpub;
         } else {
-            self.tempBodies = [];
-            for (var i =0; i < self.availableBodies().length ;i++){
-                var temp = self.availableBodies()[i].name.toLowerCase();
+            self.tempBrewpub = [];
+            for (var i =0; i < allBrewpubs().length ;i++){
+                var temp = allBrewpubs()[i].name.toLowerCase();
                 // Note this test is case sensitive
                 if ((query().length > 0) && (temp.search(query().toLowerCase()) > -1)){
                     //console.log(query(),temp);
 
-                    self.tempBodies.push(self.availableBodies()[i]);
+                    self.tempBrewpub.push(allBrewpubs()[i]);
                  };
             };
             //console.log("here2",self.tempBodies);
-            return self.tempBodies;
+            return self.tempBrewpub;
         }
     });
 
     self.clickedBody= function(i) {
-        console.log("clicked",i.name);
-        chosenOne.pop();
-        chosenOne.push(i.name);
+        //console.log("clicked",i.name);
+        //chosenOne.pop();
+        //chosenOne.push(i.name);
 
         //why is this one not working?
-        self.selection("");
-        self.selection(i.name);
-        console.log("result", chosenOne()[0],"or",self.selection());
+        selection("");
+        selection(i.name);
+        //console.log("result", chosenOne()[0],"or",self.selection());
+        console.log("result", selection());
     };
 
 };
@@ -78,10 +100,8 @@ function ListViewModel(){
 function DetailsViewModel(){
     console.log("in DetailsViewModel");
     var self=this;
-
     self.detailsResults = ko.observable();
-
-    self.pubName = ko.observable("test");
+    self.pubName = ko.observable();
     self.img = ko.observable();
     self.ph  = ko.observable();
     self.url = ko.observable();
@@ -89,33 +109,32 @@ function DetailsViewModel(){
     self.rating = ko.observable();
     self.snippet = ko.observable();
 
-    self.getDetails = ko.computed(function(){
-        var YELP_BASE_URL = 'http://api.yelp.com/v2/search';
-        var YELP_KEY = 'zlSHMTd6jFsZDtRz_xLTKg';
-        var YELP_KEY_SECRET = 'h0q1qcYo0NZlf8QYVgLnmFiJ_qM';
-        var YELP_TOKEN = 'DpBAHxm5PtaOkbFH1g2XaGumRDAdN9t6';
-        var YELP_TOKEN_SECRET = 'Z1lKnImH7eodJHFIo6yQtuE_ARI';
+    // default with details hidden
+    $(".search-container").hide();
 
-        var yelp_url = YELP_BASE_URL;
+    self.getDetails = ko.computed(function(){
+
+        var yelp_url = 'http://api.yelp.com/v2/search';
         //var yelpRequestTimeout = setTimeout(function(){
         //    $yelp-elem.text("failed to get yelp resources");
         //}, 8000);
         var nonce_generate = Math.floor(Math.random() * 1e12).toString();
 
         var parameters = {
-            oauth_consumer_key: YELP_KEY,
-            oauth_token: YELP_TOKEN,
+            oauth_consumer_key: auth.YELP_KEY,
+            oauth_token: auth.YELP_TOKEN,
             oauth_nonce: nonce_generate,
             oauth_timestamp: Math.floor(Date.now()/1000),
             oauth_signature_method: 'HMAC-SHA1',
             oauth_version : '1.0',
             callback: 'cb',              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
-            term: chosenOne()[0],       // This might push an evaluation?
+            term: selection(),       // This might push an evaluation?
             location: "San Diego, CA",
             limit: '1'
         };
+        console.log("getDetails about: ", parameters);
 
-        var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
+        var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, auth.YELP_KEY_SECRET, auth.YELP_TOKEN_SECRET);
 
         parameters.oauth_signature = encodedSignature;
         //Debug
@@ -129,12 +148,15 @@ function DetailsViewModel(){
             success: function(results) {
                 //dostuff
 
-                    console.log("works!");
+                    console.log("works!", selection());
                     self.detailsResults(results.businesses[0]);
-                    console.log(self.detailsResults());
-                    console.log(self.detailsResults().name, self.detailsResults().location.coordinate);
+                    //sometimes it's sending 2 calls ..first one returns undefined
 
-                    //self.pubName = self.detailsResults.name;
+
+                    console.log("output:", self.detailsResults());
+
+                    //need to test for null results
+
                     self.pubName(results.businesses[0].name);
                     self.img(results.businesses[0].image_url);
                     self.ph(results.businesses[0].display_phone);
@@ -155,8 +177,14 @@ function DetailsViewModel(){
 
         //console.log(yelp_url, settings.data);
         // tests if anything is selected before ajax call
-        if (chosenOne()[0] != null) {
+        if ((selection() != null) && (selection() != "")) {
+            console.log("no null", selection());
+            console.log("term: ",  parameters.term);
+
             $.ajax(settings);
+            // show details
+            $(".search-container").show();
+
         };
     });
 
@@ -178,33 +206,6 @@ function obtainBreweryDbList(){
 */
 
 /*
-function obtainNytimesArticles(){
-    var NYTIMES_API_KEY ='40257ad2896f85cc4647f58de8572b74:4:12077278';
-    var testBrewery = 'Ballast Point Brewery'
-    var NTYIMES_URL = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?q='+ testBrewery + '&sort=newest&api-key=' + NYTIMES_API_KEY;
-    var $nytHeaderElem = $('#nytimes-header');
-    var $nytElem = $('#nytimes-articles');
-
-    $.getJSON( NTYIMES_URL, function( data ) {
-        $nytHeaderElem.text("New York Times Articles About" + testBrewery);
-        articles = data.response.docs;
-        for (var i = 0; i < articles.length; i++) {
-            var article = articles[i];
-            $nytElem.append('<li class="article">' + '<a href="' + article.web_url+'">' +article.headline.main + '</a>' + '<p>' + article.snippet + '</p>' + '</li>');
-        };
-    }).error(function(e){
-        $nytHeaderElem.text('New York Times Article could not be loaded')
-    });
-
-};
-*/
-
-
-
-
-
-
-/*
 function codeAddress(temp){
     //var address = document.getElementById("address").value;
     var address = temp;
@@ -222,29 +223,6 @@ function codeAddress(temp){
     });
 };
 */
-function brewpub(ibrewery){
-    var self = this;
-    self.name = ibrewery.id;
-    self.lat = ibrewery.location.coordinate.latitude;
-    self.lng = ibrewery.location.coordinate.longitude;
-    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
-    self.infoWindow = new google.maps.InfoWindow({
-        content: self.contentString
-        });
-    self.marker = function(){
-        return new google.maps.Marker({
-            map: map,
-            position: new google.maps.LatLng(self.lat, self.lng),
-            title: self.name
-        })
-    };
-
-    //Draw marker
-    self.marker();
-    //turn marker off
-    //self.marker().setVisible(false);
-    self.infoWindow.open(map, self.marker());
-};
 
 function initInfoWindow(marker){
 
@@ -278,11 +256,12 @@ function GoogleMapViewModel(city){
 
     // observables
     // want to update search area
-
+    /*
     self.searchArea= ko.observable(city.place);
     self.processedLocation = ko.computed(function(){
         return self.searchArea()+" here";
     },self);
+    */
 
     // build editable list of brewpubs
     // brewery markers
@@ -330,7 +309,7 @@ var mapAppearance = function(){
         }
     ]);
 };
- 
+
 function masterVM() {
     this.mapViewModel = new GoogleMapViewModel(initialLocation)
     this.listViewModel = new ListViewModel();
