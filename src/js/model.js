@@ -48,7 +48,7 @@ var initialBrewpubs = [
     {
         display_phone: '+1-619-255-7213',
         id: 'ballast-point-little-italy-san-diego',
-        name: '"Ballast Point - Little Italy',
+        name: 'Ballast Point - Little Italy',
         phone: '6192557213',
         location: {
             address: [ '2215 India St'],

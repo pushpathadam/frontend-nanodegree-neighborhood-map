@@ -5,29 +5,20 @@ var allMarkers=[];
 //var userLocation; //need to query that one
 var brewpubList;
 
-var chosenOne = ko.observableArray([]); //may keep as a temp
+var chosenOne = ko.observableArray([]); //may keep as a temp or just use a single
 var query = ko.observable("");
 var selection = ko.observable("");
 
-
-var visibleBodies = ko.observableArray([]);
 var allBrewpubs = ko.observableArray([]);
-
-
-function person(name) {
-    var self = this;
-    self.name = name;
-    self.flower = "poinsetta";
-    //self.visible = ko.observable(true);
-    //self.selected = ko.observable(false);
-};
-
-function brewpub(ibrewery){
+/*
+function createInfoWindow(ibrewery){
     var self = this;
     self.name = ibrewery.name;
     self.lat = ibrewery.location.coordinate.latitude;
     self.lng = ibrewery.location.coordinate.longitude;
+
     self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
+    //just need one info window function
     self.infoWindow = new google.maps.InfoWindow({
         content: self.contentString
         });
@@ -38,12 +29,51 @@ function brewpub(ibrewery){
             title: self.name
         })
     };
+    self.marker();
+    self.infoWindow.open(map, self.marker());
+};
+*/
+function brewpub(ibrewery){
+    var self = this;
+    self.name = ibrewery.name;
+    self.lat = ibrewery.location.coordinate.latitude;
+    self.lng = ibrewery.location.coordinate.longitude;
+    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
+    //just need one info window function
+    self.infoWindow = new google.maps.InfoWindow({
+        content: self.contentString
+        });
+    self.marker = ko.computed(function(){
+        /*var image = {
+            url: "http://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png",
+            size: null,
+            origin: null,
+            anchor: null,
+            scaledSize: null,
+        };
+        */
+        return new google.maps.Marker({
+            //icon: image;
+            //map: map,
+            position: new google.maps.LatLng(self.lat, self.lng),
+            title: self.name
+        })
+    });
+    //marker animation function needed
+    self.selected = function(){
+        self.infoWindow.open(map, self.marker());
+    };
+    self.notselected = function(){
+        self.infoWindow.close();
+    };
 
     //Draw marker
-    self.marker();
+    //self.marker();
+
     //turn marker off
     //self.marker().setVisible(false);
-    self.infoWindow.open(map, self.marker());
+
+    //self.infoWindow.open(map, self.marker());
 };
 
 
@@ -53,45 +83,46 @@ function ListViewModel(){
 
     var self = this;
 
-    for (var i = 0; i < initialBrewpubs.length; i++){
-            allBrewpubs.push(new brewpub(initialBrewpubs[i]))
-    };
-
-
-
     self.search =  ko.computed(function(){
         //self.tempBodies = self.availableBodies.slice(0);
+
         self.tempBrewpub = allBrewpubs.slice(0);
+
         if (query().length < 1) {
-            //console.log("here1",self.tempBodies);
-            //return self.tempBodies;
             return self.tempBrewpub;
         } else {
             self.tempBrewpub = [];
             for (var i =0; i < allBrewpubs().length ;i++){
+                //allBrewpubs()[i].invisible();
+                allBrewpubs()[i].marker().setMap(null);
                 var temp = allBrewpubs()[i].name.toLowerCase();
                 // Note this test is case sensitive
                 if ((query().length > 0) && (temp.search(query().toLowerCase()) > -1)){
                     //console.log(query(),temp);
-
+                    //allBrewpubs()[i].visible();
+                    allBrewpubs()[i].marker().setMap(map);
                     self.tempBrewpub.push(allBrewpubs()[i]);
-                 };
+                };
             };
-            //console.log("here2",self.tempBodies);
+            console.log("search matches", self.tempBrewpub);
             return self.tempBrewpub;
         }
     });
 
-    self.clickedBody= function(i) {
-        //console.log("clicked",i.name);
-        //chosenOne.pop();
-        //chosenOne.push(i.name);
-
-        //why is this one not working?
+    self.clickedBody= function(body) {
         selection("");
-        selection(i.name);
+        selection(body.name);
         //console.log("result", chosenOne()[0],"or",self.selection());
-        console.log("result", selection());
+        console.log("global selection", selection());
+        //clear old markers
+        for (var i =0; i < allBrewpubs().length ;i++){
+            //clear all markers
+            allBrewpubs()[i].marker().setMap(null);
+            if (selection() === allBrewpubs()[i].name){
+                allBrewpubs()[i].marker().setMap(map);
+                allBrewpubs()[i].selected();
+            };
+        }
     };
 
 };
@@ -224,18 +255,6 @@ function codeAddress(temp){
 };
 */
 
-function initInfoWindow(marker){
-
-    //var infoWindowContainer {
-    //    contentString = '<div class="content">'+
-    //        ibrewery.name +
-    //        '</div>';
-    //}
-    //infoWindow.setContent(infoWindowContainer);
-
-    //infoWindow.open(marker.getMap(), marker);
-};
-
 function testb(){console.log("testbutton")};
 
 // GoogleMapViewModel
@@ -243,7 +262,10 @@ function GoogleMapViewModel(city){
 
     // self is the viewModels
     // pointer for keeping outer this separate from inner this
+
+
     var self = this;
+
     self.latlng = new google.maps.LatLng(city.location.lat, city.location.lng);
     self.mapOptions = {
         center: {lat: city.location.lat, lng: city.location.lng},
@@ -251,31 +273,61 @@ function GoogleMapViewModel(city){
     };
 
     //creating global map
-    map = new google.maps.Map(document.getElementById('map-canvas'),this.mapOptions);
+    //map = new google.maps.Map(document.getElementById('map-canvas'),this.mapOptions);
+    map = new google.maps.Map(document.getElementById('map-canvas'));
+    map.setCenter(self.mapOptions.center);
+    map.setZoom(self.mapOptions.zoom);
+    //map.fitBounds(bounds)
 
 
-    // observables
-    // want to update search area
-    /*
-    self.searchArea= ko.observable(city.place);
-    self.processedLocation = ko.computed(function(){
-        return self.searchArea()+" here";
-    },self);
-    */
 
-    // build editable list of brewpubs
-    // brewery markers
-    self.brewpubList = ko.observableArray([]);
+    // intitial markers
     for (var i = 0; i < initialBrewpubs.length; i++){
-        self.brewpubList.push(new brewpub(initialBrewpubs[i]))
-    }
+                allBrewpubs.push(new brewpub(initialBrewpubs[i]));
+                allBrewpubs()[i].marker().setMap(null);
+    };
+
+
+    function drawMap(){
+        for (var i = 0; i < initialBrewpubs.length; i++){
+                allBrewpubs()[i].marker().setMap(null);
+        };
+
+        // filtered venues?
+        for (var i = 0; i < initialBrewpubs.length; i++){
+                allBrewpubs()[i].marker().setMap(map);
+                console.log("in drawMap", allBrewpubs()[i].name);
+                function brewDetail(title){
+                    for (var i = 0; i < initialBrewpubs.length; i++){
+                            if (title === allBrewpubs()[i].name) {
+                                allBrewpubs()[i].selected()
+                            }
+                    };
+                };
+                google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
+                    //focusOnLocationWithDetail(this);
+                    //want to showInfoWindow
+                    brewDetail(this.title);
+                    //trigger details view
+                    selection(this.title);
+                    console.log("marker title",this);
+                });
+        };
+    };
+
+    function cleanMap(){
+        if(infoWindow){infoWindow.close()};
+    };
+    drawMap();
+
 
     //operations on brewpub list
 
     //current or selected brewpub
     // need to be connected to maps
     // need to be pushed out to details window
-    self.currentBrewpub = ko.observable(self.brewpubList()[0]);
+    /*
+    self.currentBrewpub = ?;
 
 
     self.setBrewpub =function(clickedBrewpub){
@@ -286,6 +338,7 @@ function GoogleMapViewModel(city){
     self.xBrewpub = function(clickedBrewpub){
         console.log("xBrewpup");
     };
+    */
 
     // hide brewpubs
     // show brewpubs

@@ -76,6 +76,8 @@ https://discussions.udacity.com/t/api-keys-stored-in-repositories/3677
 https://discussions.udacity.com/t/yelp-api-ajax-request/15747/9
 https://help.github.com/articles/remove-sensitive-data/
 
+https://discussions.udacity.com/t/markers-cant-bounce-and-show-information-box-after-1-click/34482
+
 ### Cross Domain Issues & YQL Hack
 http://makina-corpus.com/blog/metier/2013/dealing-with-cross-domain-issues
 
