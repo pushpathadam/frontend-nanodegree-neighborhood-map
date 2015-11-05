@@ -40,14 +40,14 @@
         <h3>or an object <span data-bind='text: chosenOne()'></span></h3>
         -->
         <ul id="my-list" data-bind="foreach: allBrewpubs">
-            <li data-bind="text: name, click: $parent.clickedBody"></li>
+            <li data-bind="text: name, click: $parent.clickedListing"></li>
         </ul>
 
         <h3>Visible Bodies containing query string <span data-bind='text: query'></span></h3>
         <h3>In <span data-bind='text: search()'></span></h3>
 
         <ul id="my-list2" data-bind="foreach: search()">
-            <li data-bind="text: name, click: $parent.clickedBody"></li>
+            <li data-bind="text: name, click: $parent.clickedListing"></li>
         </ul>
     </div>
 
@@ -60,8 +60,11 @@
     </div>
 
     <!-- Compartmentalized DetailsViewModel -->
-    <!-- Details of the selected Brewpub pulled from Yelp-->
+    <!-- Details of the selected Brewpub pulled from Yelp
     <div class="search-container"data-bind="with: detailsViewModel">
+-->
+
+    <div class="search-container" data-bind="with: searchResults">
         <h2>detailsViewModel</h2>
 
         <h3>I'm looking for <span data-bind='text: selection'></span></h3>

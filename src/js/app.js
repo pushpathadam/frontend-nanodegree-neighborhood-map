@@ -1,47 +1,153 @@
 //Globals
-var map;
-//var geocoder; //only if we query user location
-var allMarkers=[];
-//var userLocation; //need to query that one
-var brewpubList;
-
-var chosenOne = ko.observableArray([]); //may keep as a temp or just use a single
-var query = ko.observable("");
-var selection = ko.observable("");
-
-var allBrewpubs = ko.observableArray([]);
-/*
-function createInfoWindow(ibrewery){
-    var self = this;
-    self.name = ibrewery.name;
-    self.lat = ibrewery.location.coordinate.latitude;
-    self.lng = ibrewery.location.coordinate.longitude;
-
-    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
-    //just need one info window function
-    self.infoWindow = new google.maps.InfoWindow({
-        content: self.contentString
-        });
-    self.marker = function(){
-        return new google.maps.Marker({
-            map: map,
-            position: new google.maps.LatLng(self.lat, self.lng),
-            title: self.name
-        })
+var map;                                    //google map
+//var geocoder;                             //only if we query user location
+//var userLocation;                         //need to query that one
+var allBrewpubs = ko.observableArray([]);   //container of all brewpub objects
+var query           = ko.observable("");    //search query string
+var selection       = ko.observable("");    //selection triggers lots of things
+var selectionIndex  = ko.computed(function (){
+    for (var i =0; i < allBrewpubs().length ;i++){
+        if (selection()=== allBrewpubs()[i].name){
+            return i;
+        };
     };
-    self.marker();
-    self.infoWindow.open(map, self.marker());
+});
+var infoWindowText = ko.observable("");     //TBD
+                                            //current search result
+var searchResults = {
+        detailsResults : ko.observable(),
+        pubName : ko.observable(),
+        img : ko.observable(),
+        ph  : ko.observable(),
+        url : ko.observable(),
+        stars : ko.observable(),
+        rating : ko.observable(),
+        snippet : ko.observable()
 };
-*/
-function brewpub(ibrewery){
+
+function YelpSearch(){
+    console.log("in YelpQuery");
+    var self=this;
+
+    //self.detailsResults = ko.observable();
+    //self.pubName = ko.observable();
+    //self.img = ko.observable();
+    //self.ph  = ko.observable();
+    //self.url = ko.observable();
+    //self.stars = ko.observable();
+    //self.rating = ko.observable();
+    //self.snippet = ko.observable();
+
+    self.getDetails = ko.computed(function(){
+
+        var yelp_url = 'http://api.yelp.com/v2/search';
+        //var yelpRequestTimeout = setTimeout(function(){
+        //    $yelp-elem.text("failed to get yelp resources");
+        //}, 8000);
+        var nonce_generate = Math.floor(Math.random() * 1e12).toString();
+
+        var parameters = {
+            oauth_consumer_key: auth.YELP_KEY,
+            oauth_token: auth.YELP_TOKEN,
+            oauth_nonce: nonce_generate,
+            oauth_timestamp: Math.floor(Date.now()/1000),
+            oauth_signature_method: 'HMAC-SHA1',
+            oauth_version : '1.0',
+            callback: 'cb',                 // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+            term: selection(),              // This observable pushes an evaluation!
+            location: "San Diego, CA",
+            limit: '1'
+        };
+        console.log("yelpSearch-1 getDetails: ", parameters);
+
+        var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, auth.YELP_KEY_SECRET, auth.YELP_TOKEN_SECRET);
+
+        parameters.oauth_signature = encodedSignature;
+
+        var settings = {
+            url: yelp_url,
+            data: parameters,
+            cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
+            dataType: 'jsonp',
+            success: function(results) {
+                //dostuff
+
+                    searchResults.detailsResults(results.businesses[0]);
+                    //sometimes it's sending 2 calls ..first one returns undefined
+
+
+                    console.log("yelpSearch-4: output:", searchResults.detailsResults());
+
+                    //need to test for null results
+
+                    searchResults.pubName(results.businesses[0].name);
+                    searchResults.img(results.businesses[0].image_url);
+                    searchResults.ph(results.businesses[0].display_phone);
+                    searchResults.url(results.businesses[0].url);
+                    searchResults.stars(results.businesses[0].rating_img_url_small);
+                    searchResults.rating(results.businesses[0].rating);
+                    searchResults.snippet(results.businesses[0].snippet_text);
+                    console.log("yelpSearch-5: pubname",searchResults.pubName());
+
+                    //only update after query returns defined results
+                    if (searchResults.pubName()!= null) {
+                        //updateInfoWindowText("yelpSearch");
+                        temp = infoWindowText();
+                        console.log("yelpSearch-6: windowText",temp);
+                        allBrewpubs()[selectionIndex()].selected();
+                    };
+
+            },
+            error:function(jqXHR, textStatus, errorThrown) {
+                //dostuff
+                // need message sorry couldnt find any info on this business on yelp
+                console.log("yelpSearch-error");
+            }
+        };
+
+        //console.log(yelp_url, settings.data);
+        // tests if anything is selected before ajax call
+        if ((selection() != null) && (selection() != "")) {
+            console.log("yelpSearch-2:", selection());
+            console.log("yelpSearch-3 term: ",  parameters.term);
+            $.ajax(settings);
+        };
+    });
+
+};
+
+
+function updateInfoWindowText(codelocation){
+
+    infoWindowText('<div id="container-'+
+    searchResults.pubName() +
+    '">'+
+    '<h2 class= "info-location-name">'+
+    searchResults.pubName()+
+    '</h2>'+
+    '<p>'+
+    searchResults.ph()+
+    '</p>'+
+    '</div>');
+
+    console.log("updateingInfoWindowText from", codelocation," :", infoWindowText());
+    //return contentString;
+};
+
+function brewpub(ibrewery){;
+
     var self = this;
     self.name = ibrewery.name;
     self.lat = ibrewery.location.coordinate.latitude;
     self.lng = ibrewery.location.coordinate.longitude;
-    self.contentString = '<div class="content">'+ ibrewery.name + '</div>';
+    self.contentString = infoWindowText();
+    //'<div class="content">'+ ibrewery.name + '</div>' ;
     //just need one info window function
     self.infoWindow = new google.maps.InfoWindow({
+        //no connection to external or yelp data
         content: self.contentString
+        //content: updateInfoWindowText()
+
         });
     self.marker = ko.computed(function(){
         /*var image = {
@@ -60,22 +166,20 @@ function brewpub(ibrewery){
         })
     });
     //marker animation function needed
+    //this should push out infoWindow
     self.selected = function(){
+        //infoWindowText("");
+        self.infoWindow.setContent("");
+        updateInfoWindowText("selected");
+        self.infoWindow.setContent(infoWindowText());
         self.infoWindow.open(map, self.marker());
     };
+    // close infoWindow
     self.notselected = function(){
+        self.infoWindow.setContent("");
         self.infoWindow.close();
     };
-
-    //Draw marker
-    //self.marker();
-
-    //turn marker off
-    //self.marker().setVisible(false);
-
-    //self.infoWindow.open(map, self.marker());
 };
-
 
 // ListViewModel
 function ListViewModel(){
@@ -89,17 +193,20 @@ function ListViewModel(){
         self.tempBrewpub = allBrewpubs.slice(0);
 
         if (query().length < 1) {
+            for (var i =0; i < allBrewpubs().length ;i++){
+                allBrewpubs()[i].notselected();
+                allBrewpubs()[i].marker().setMap(map);
+            };
             return self.tempBrewpub;
         } else {
             self.tempBrewpub = [];
             for (var i =0; i < allBrewpubs().length ;i++){
-                //allBrewpubs()[i].invisible();
+                // clear out infowindows and markers
+                allBrewpubs()[i].notselected();
                 allBrewpubs()[i].marker().setMap(null);
                 var temp = allBrewpubs()[i].name.toLowerCase();
-                // Note this test is case sensitive
+                // turns on all markers that match the query
                 if ((query().length > 0) && (temp.search(query().toLowerCase()) > -1)){
-                    //console.log(query(),temp);
-                    //allBrewpubs()[i].visible();
                     allBrewpubs()[i].marker().setMap(map);
                     self.tempBrewpub.push(allBrewpubs()[i]);
                 };
@@ -109,18 +216,21 @@ function ListViewModel(){
         }
     });
 
-    self.clickedBody= function(body) {
+    // triggerd by clicking on listing
+    self.clickedListing= function(listing) {
         selection("");
-        selection(body.name);
-        //console.log("result", chosenOne()[0],"or",self.selection());
-        console.log("global selection", selection());
+        selection(listing.name); //just a string containing name
+        console.log("Clicked Listing-1 global selection:", selection());
         //clear old markers
         for (var i =0; i < allBrewpubs().length ;i++){
             //clear all markers
+            allBrewpubs()[i].notselected();
             allBrewpubs()[i].marker().setMap(null);
+
             if (selection() === allBrewpubs()[i].name){
                 allBrewpubs()[i].marker().setMap(map);
-                allBrewpubs()[i].selected();
+                //show infoWindow
+                //allBrewpubs()[i].selected();
             };
         }
     };
@@ -163,7 +273,7 @@ function DetailsViewModel(){
             location: "San Diego, CA",
             limit: '1'
         };
-        console.log("getDetails about: ", parameters);
+        console.log("DVM-getDetails about: ", parameters);
 
         var encodedSignature = oauthSignature.generate('GET', yelp_url, parameters, auth.YELP_KEY_SECRET, auth.YELP_TOKEN_SECRET);
 
@@ -179,12 +289,12 @@ function DetailsViewModel(){
             success: function(results) {
                 //dostuff
 
-                    console.log("works!", selection());
+                    console.log("DVM-works!", selection());
                     self.detailsResults(results.businesses[0]);
                     //sometimes it's sending 2 calls ..first one returns undefined
 
 
-                    console.log("output:", self.detailsResults());
+                    console.log("DVM-output:", self.detailsResults());
 
                     //need to test for null results
 
@@ -195,22 +305,22 @@ function DetailsViewModel(){
                     self.stars(results.businesses[0].rating_img_url_small);
                     self.rating(results.businesses[0].rating);
                     self.snippet(results.businesses[0].snippet_text);
-                    console.log("pubname",self.pubName());
+                    console.log("DVM-pubname",self.pubName());
 
 
             },
             error:function(jqXHR, textStatus, errorThrown) {
                 //dostuff
                 // need message sorry couldnt find any info on this business on yelp
-                console.log("error");
+                console.log("DVM-error");
             }
         };
 
         //console.log(yelp_url, settings.data);
         // tests if anything is selected before ajax call
         if ((selection() != null) && (selection() != "")) {
-            console.log("no null", selection());
-            console.log("term: ",  parameters.term);
+            console.log("DVM-no null", selection());
+            console.log("DVM-term: ",  parameters.term);
 
             $.ajax(settings);
             // show details
@@ -297,16 +407,22 @@ function GoogleMapViewModel(city){
         for (var i = 0; i < initialBrewpubs.length; i++){
                 allBrewpubs()[i].marker().setMap(map);
                 console.log("in drawMap", allBrewpubs()[i].name);
+
                 function brewDetail(title){
                     for (var i = 0; i < initialBrewpubs.length; i++){
+                            //clear out infowindows
+                            allBrewpubs()[i].notselected();
                             if (title === allBrewpubs()[i].name) {
-                                allBrewpubs()[i].selected()
+                                //calls infoWindow
+
+                                allBrewpubs()[i].selected();
                             }
                     };
                 };
                 google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
                     //focusOnLocationWithDetail(this);
                     //want to showInfoWindow
+
                     brewDetail(this.title);
                     //trigger details view
                     selection(this.title);
@@ -317,31 +433,11 @@ function GoogleMapViewModel(city){
 
     function cleanMap(){
         if(infoWindow){infoWindow.close()};
+        infoWindowText("");
     };
+    //cleanMap();
+    infoWindowText("");
     drawMap();
-
-
-    //operations on brewpub list
-
-    //current or selected brewpub
-    // need to be connected to maps
-    // need to be pushed out to details window
-    /*
-    self.currentBrewpub = ?;
-
-
-    self.setBrewpub =function(clickedBrewpub){
-        self.currentBrewpub(clickedBrewpub);
-    };
-
-    // list of brewpubs that match search query
-    self.xBrewpub = function(clickedBrewpub){
-        console.log("xBrewpup");
-    };
-    */
-
-    // hide brewpubs
-    // show brewpubs
 };
 
 
@@ -366,7 +462,8 @@ var mapAppearance = function(){
 function masterVM() {
     this.mapViewModel = new GoogleMapViewModel(initialLocation)
     this.listViewModel = new ListViewModel();
-    this.detailsViewModel = new DetailsViewModel();
+    //this.detailsViewModel = new DetailsViewModel();
+    this.yelpSearch = new YelpSearch();
 };
 
 function googleSuccess() {
