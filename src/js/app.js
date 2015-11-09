@@ -12,16 +12,22 @@ var selectionIndex  = ko.computed(function (){
         };
     };
 });
+var selectedPub = ko.computed(function(){
+    return allBrewpubs()[selectionIndex()];
+});
 var infoWindowText = ko.observable("");     //TBD
                                             //current search result
 var searchResults = {
         detailsResults : ko.observable(),
         pubName : ko.observable(),
-        img : ko.observable(),
+        dph  : ko.observable(),
         ph  : ko.observable(),
+        address : ko.observable(),
+        city : ko.observable(),
+        state : ko.observable(),
+        zip : ko.observable(),
         url : ko.observable(),
         stars : ko.observable(),
-        rating : ko.observable(),
         snippet : ko.observable()
 };
 
@@ -81,11 +87,11 @@ function YelpSearch(){
                     //need to test for null results
 
                     searchResults.pubName(results.businesses[0].name);
-                    searchResults.img(results.businesses[0].image_url);
-                    searchResults.ph(results.businesses[0].display_phone);
+                    searchResults.dph(results.businesses[0].display_phone);
+                    searchResults.ph(results.businesses[0].phone);
+                    searchResults.address(results.businesses[0].location.display_address);
                     searchResults.url(results.businesses[0].url);
                     searchResults.stars(results.businesses[0].rating_img_url_small);
-                    searchResults.rating(results.businesses[0].rating);
                     searchResults.snippet(results.businesses[0].snippet_text);
                     console.log("yelpSearch-5: pubname",searchResults.pubName());
 
@@ -94,7 +100,8 @@ function YelpSearch(){
                         //updateInfoWindowText("yelpSearch");
                         temp = infoWindowText();
                         console.log("yelpSearch-6: windowText",temp);
-                        allBrewpubs()[selectionIndex()].selected();
+                        //allBrewpubs()[selectionIndex()].selected();
+                        selectedPub().selected();
                     };
 
             },
@@ -117,18 +124,33 @@ function YelpSearch(){
 };
 
 
-function updateInfoWindowText(codelocation){
+function updateInfoWindowText(name,codelocation){
+    if (name!=searchResults.pubName()){
+        infoWindowText('<div id="container-pub">'+
+        '<h2 class= "info-location-name">'+
+        name+
+        '</h2>'+
+        '<p>'+ "loading info ..." +
+        '</p>' +
+        '</div>');
+    } else {
+        infoWindowText('<div id="container-pub">'+
+        '<h2 class= "info-location-name">'+
+        searchResults.pubName()+ '&nbsp &nbsp <a href="tel:'+searchResults.ph()+'">' +
+        searchResults.dph()+
+        '</a></h2>'+
+        '<p>'+
+        searchResults.address()+
+        '<br>' +
+        '</p>'+
+        '<img src="' + searchResults.stars() + '" height="17" width ="84">' +
+        '<p>'+
+        searchResults.snippet()+
+        '<a href="' + searchResults.url() + '"> Read more</a>' +
+        '</p>' +
+        '</div>');
 
-    infoWindowText('<div id="container-'+
-    searchResults.pubName() +
-    '">'+
-    '<h2 class= "info-location-name">'+
-    searchResults.pubName()+
-    '</h2>'+
-    '<p>'+
-    searchResults.ph()+
-    '</p>'+
-    '</div>');
+    }
 
     console.log("updateingInfoWindowText from", codelocation," :", infoWindowText());
     //return contentString;
@@ -140,12 +162,13 @@ function brewpub(ibrewery){;
     self.name = ibrewery.name;
     self.lat = ibrewery.location.coordinate.latitude;
     self.lng = ibrewery.location.coordinate.longitude;
-    self.contentString = infoWindowText();
+    self.contentString = infoWindowText(); //default
     //'<div class="content">'+ ibrewery.name + '</div>' ;
     //just need one info window function
-    self.infoWindow = new google.maps.InfoWindow({
+        self.infoWindow = new google.maps.InfoWindow({
         //no connection to external or yelp data
-        content: self.contentString
+        //content: self.contentString
+        content: self.name
         //content: updateInfoWindowText()
 
         });
@@ -158,6 +181,7 @@ function brewpub(ibrewery){;
             scaledSize: null,
         };
         */
+
         return new google.maps.Marker({
             //icon: image;
             //map: map,
@@ -166,17 +190,26 @@ function brewpub(ibrewery){;
         })
     });
     //marker animation function needed
+    self.toggleBounce = function() {
+        console.log("in bounce!");
+        if (self.marker().getAnimation() !== null) {
+            self.marker().setAnimation(null);
+        } else {
+            self.marker().setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function (){self.marker().setAnimation(null)},2000);
+        };
+    };
     //this should push out infoWindow
     self.selected = function(){
-        //infoWindowText("");
-        self.infoWindow.setContent("");
-        updateInfoWindowText("selected");
+        self.toggleBounce();
+        //self.infoWindow.setContent("");
+        updateInfoWindowText(self.name,"selected");
         self.infoWindow.setContent(infoWindowText());
         self.infoWindow.open(map, self.marker());
     };
     // close infoWindow
     self.notselected = function(){
-        self.infoWindow.setContent("");
+        //self.infoWindow.setContent("");
         self.infoWindow.close();
     };
 };
@@ -226,13 +259,13 @@ function ListViewModel(){
             //clear all markers
             allBrewpubs()[i].notselected();
             allBrewpubs()[i].marker().setMap(null);
-
             if (selection() === allBrewpubs()[i].name){
                 allBrewpubs()[i].marker().setMap(map);
-                //show infoWindow
-                //allBrewpubs()[i].selected();
             };
-        }
+        };
+        //undefined at this point
+        //allBrewpubs()[selectionIndex()].marker().setMap(map);
+        //selectedPub().marker().setMap(map);
     };
 
 };
@@ -413,11 +446,10 @@ function GoogleMapViewModel(city){
                             //clear out infowindows
                             allBrewpubs()[i].notselected();
                             if (title === allBrewpubs()[i].name) {
-                                //calls infoWindow
-
                                 allBrewpubs()[i].selected();
                             }
                     };
+                    //selectedPub().selected();
                 };
                 google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
                     //focusOnLocationWithDetail(this);
