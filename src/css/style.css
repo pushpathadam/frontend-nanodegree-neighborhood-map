@@ -1,4 +1,15 @@
 /* for google maps */
 
-html, body { height: 100%; margin: 0; padding: 0; }
-#map-canvas { height: 400px; }
+/*html, body { height: 100%; margin: 0; padding: 0; }*/
+/*map-canvas { height: 400px; }*/
+#map-search {
+    padding: 0 10px 0 10px;
+}
+input {
+    width: 200px;
+}
+
+legend {
+    font-weight: 700;
+    color: #fff;
+}

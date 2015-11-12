@@ -6,88 +6,89 @@
     <title>Neighborhood Map</title>
     <!-- Customized fonts -->
     <!-- Load the page styles. -->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="css/side-menu.css">
+    <link rel="stylesheet" href="css/style.css" >
      <style>
-        #map-canvas { height: 400px; }
-        li {color: blue;}
-        li:hover {color: red;}
+        #map-canvas { height: 600px; }
+        /*li {color: blue;}*/
+        /*li:hover {color: red;} */
     </style>
     <!--
-    <link href="css/style.css" rel="stylesheet" type="text/css">
+
     -->
     <!-- Load the api keys not in github repository -->
     <script src ="js/keys.js"></script>
 </head>
 <body >
-    <header></header>
-    <h1>Brewpub Finder Demo</h1>
-    <!-- List of Brewpubs and Search Box-->
-    <div class="list-container" data-bind="with: listViewModel">
-        <h2>listViewModel</h2>
+    <div id="layout">
+        <!-- menu toggle -->
+        <a href = "#menu" id="menuLink1" class="menu-link" data-bind="click: listViewModel.toggle">
+            <!-- Hamburger icon-->
+            <span>
+            </span>
+        </a>
+        <!-- List of Brewpubs and Search Box witin purecss collabsible sidebar-->
+        <div  id= "menu" class="list-container" data-bind="with: listViewModel">
+            <div class ="pure-menu">
+                <form id="map-search">
+                    <fieldset>
+                        <legend>&nbspSEARCH / FILTER RESULTS</legend>
+                        <label><input type = "search" data-bind="textInput: query, valueUpdate: 'keyup'" /></label>
+                    </fieldset>
+                </form>
 
-        <h3> Search Box</h3>
+                <ul id="my-list2" class="pure-menu-list" data-bind="foreach: search()">
+                    <li class="pure-menu-item" data-bind="text: name, click: $parent.clickedListing"></li>
+                </ul>
+            </div>
+        </div>
 
-        <form id="map-search">
-            <fieldset>
-                <legend>Search</legend>
-                <label>Name  &nbsp<input type = "search" data-bind="textInput: query, valueUpdate: 'keyup'" /></label>
-            </fieldset>
-        </form>
+        <div id="main">
+            <header class="header">
+                <h1>San Diego Brewpub Finder</h1>
+            </header>
+            <div class="content">
+                <div>
 
-        <h3>I'm searching for <span data-bind='text: query'></span></h3>
+                    <!-- Location Finder -->
 
-        <h3>A List of Available Bodies from which I select a string <span data-bind='text: selection'></span></h3>
-        <!--
-        <h3>or an object <span data-bind='text: chosenOne()'></span></h3>
+                    <!--
+                    <div class="location-container">
+                        <input id="address" data-bind="textInput: searchArea" autocomplete="off"></input>
+                            <input id="address" type="textbox" value="San Diego, CA ">
+                        <input type="button" value="TestGoogleGeoFinder" onclick="masterVM().mapViewModel(searchArea()).drawMap()"></input>
+                    </div>
+                    -->
+
+                    <!-- Compartmentalized ViewModel for Google Maps-->
+                    <div class="map-container">
+                        <!--  Google Map Placeholder-->
+                        <div id="map-canvas"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Scripts-->
+            <script src ="js/lib/oauth-signature.min.js"></script>
+            <!--
+            <script src ="js/lib/jquery-1.11.3.min.js"></script>
+            <script src="js/lib/knockout-3.3.0.js"></script>
+            -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+            <script src ="js/model.js"></script>
+            <!--
+            <script src ="js/lib/ui.js"></script>
         -->
-        <ul id="my-list" data-bind="foreach: allBrewpubs">
-            <li data-bind="text: name, click: $parent.clickedListing"></li>
-        </ul>
+            <script src ="js/app.js"></script>
+            <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
 
-        <h3>Visible Bodies containing query string <span data-bind='text: query'></span></h3>
-        <h3>In <span data-bind='text: search()'></span></h3>
-
-        <ul id="my-list2" data-bind="foreach: search()">
-            <li data-bind="text: name, click: $parent.clickedListing"></li>
-        </ul>
-    </div>
-
-    <!-- Compartmentalized ViewModel for Google Maps-->
-    <div class="map-container">
-        <h2>googleMapsViewModel</h2>
-
-        <!--  Google Map Placeholder-->
-        <div id="map-canvas"></div>
-    </div>
-
-    <!-- Compartmentalized DetailsViewModel -->
-    <!-- Details of the selected Brewpub pulled from Yelp
-    <div class="search-container"data-bind="with: detailsViewModel">
--->
-
-    <div class="search-container" data-bind="with: searchResults">
-        <h2>detailsViewModel</h2>
-
-        <h3>I'm looking for <span data-bind='text: selection'></span></h3>
-        <p>Brew Pub Name: <span data-bind='text: pubName()'></span></p>
-        <p> phone: <span data-bind='text: ph()'></span></p>
-        <p> website: <span data-bind='text:url()'></span></p>
-        <p> stars: <span data-bind='text:stars()'></span></p>
-        <p> snippet: <span data-bind='text:snippet()'></span></p>
+            <footer> </footer>
+        </div>
 
     </div>
-
-    <!-- Scripts-->
-    <script src ="js/lib/oauth-signature.min.js"></script>
-    <!--
-    <script src ="js/lib/jquery-1.11.3.min.js"></script>
-    <script src="js/lib/knockout-3.3.0.js"></script>
-    -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-    <script src ="js/model.js"></script>
-    <script src ="js/app.js"></script>
-    <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
-
-    <footer> </footer>
 </body>
 </html>

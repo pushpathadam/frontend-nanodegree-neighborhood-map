@@ -39,6 +39,9 @@ https://segmentationsolutions.nielsen.com/mybestsegments/
 ### Crime
 crimereports.com
 
+### Beer
+http://beermapping.com/maps/citymaps.php?m=sandiego#lat=undefined&lng=undefined&z=7
+
 ### Good resources
 
 Style Guide
