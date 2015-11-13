@@ -1,9 +1,7 @@
 //Globals
 var map;                                    //google map
-
 var geocoder;                                   //store new location
 var searchArea = ko.observable("San Diego City, CA");             //only if we query user location
-//var userLocation = ko.observable("");       //need to query that one
 
 var allBrewpubs = ko.observableArray([]);   //container of all brewpub objects
 var query           = ko.observable("");    //search query string
@@ -83,7 +81,7 @@ function YelpSearch(){
                     searchResults.url(results.businesses[0].url);
                     searchResults.stars(results.businesses[0].rating_img_url_small);
                     searchResults.snippet(results.businesses[0].snippet_text);
-                    //console.log("yelpSearch-5: pubname",searchResults.pubName());
+                    console.log("yelpSearch-5: pubname",searchResults.pubName());
 
                     //only update after query returns defined results
                     if (searchResults.pubName()!= null) {
@@ -96,6 +94,7 @@ function YelpSearch(){
             error:function(jqXHR, textStatus, errorThrown) {
                 //dostuff
                 // need message sorry couldnt find any info on this business on yelp
+                alert("Geocode was not successful for the following reason: " + textStatus);
                 console.log("yelpSearch-error");
             }
         };
@@ -113,6 +112,7 @@ function YelpSearch(){
 
 // create and format infoWindow Contents
 function updateInfoWindowText(name,codelocation){
+    //console.log("debug InfoWindoText:",name, searchResults.pubName());
     if (name!=searchResults.pubName()){
         infoWindowText('<div id="container-pub">'+
         '<h2 class= "info-location-name">'+
@@ -168,7 +168,7 @@ function brewpub(currentBrewpub){;
 
     //changes marker color and adds animation in mapViewModel
     self.toggleBounce = function() {
-        console.log("in bounce!");
+        //console.log("in bounce!");
         if (self.marker().getAnimation() !== null) {
             self.marker().setIcon(self.image);
             self.marker().setAnimation(null);
@@ -210,7 +210,7 @@ function brewpub(currentBrewpub){;
 
 // ListViewModel
 function ListViewModel(){
-    console.log("in ListViewModel");
+    //console.log("in ListViewModel");
 
     var self = this;
 
@@ -222,7 +222,7 @@ function ListViewModel(){
 
     //modified function from pure ui.js to work with knockout
     self.sidebarToggle = function toggleClass(element, className) {
-        console.log("test-sidebarToggle");
+        //console.log("test-sidebarToggle");
         var classes = element.className.split(/\s+/),
             length = classes.length,
             i = 0;
@@ -283,7 +283,7 @@ function ListViewModel(){
     self.clickedListing= function(listing) {
         selection("");
         selection(listing.name); //just a string containing name
-        console.log("Clicked Listing-1 global selection:", selection());
+        //console.log("Clicked Listing-1 global selection:", selection());
         //clear old markers
         for (var i =0; i < allBrewpubs().length ;i++){
             //clear all markers
@@ -395,12 +395,13 @@ function GoogleMapViewModel(){
         // filtered venues?
         for (var i = 0; i < initialBrewpubs.length; i++){
                 allBrewpubs()[i].marker().setMap(map);
-                console.log("in drawMap", allBrewpubs()[i].name);
+                //console.log("in drawMap", allBrewpubs()[i].name);
 
                 function brewDetail(title){
                     for (var i = 0; i < initialBrewpubs.length; i++){
                             //clear out infowindows
                             allBrewpubs()[i].notselected();
+                            console.log("debug:brewDetail:", title,allBrewpubs()[i].name)
                             if (title === allBrewpubs()[i].name) {
                                 allBrewpubs()[i].selected();
                             }
@@ -422,12 +423,12 @@ function GoogleMapViewModel(){
                     brewDetail(this.title);
                     //trigger details view
                     selection(this.title);
-                    console.log("marker title",this);
+                    //console.log("marker title",this);
                 });
                 google.maps.event.addListener(allBrewpubs()[i].infoWindow,'closeclick',function(){
                     //asking to close already closed window
                     cleanup();
-                    console.log("closing",selection());
+                    //console.log("closing",selection());
                 });
         };
 

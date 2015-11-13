@@ -1,48 +1,27 @@
-# frontend-nanodegree-neighborhood-map
-Udacity Frontend Nanodegree P5.
+# Frontend Nanodegree Neighborhood Map Project
+
+After looking at several existing applications that provide neighborhood information I found that currently the
+most accessible metric for assessing a neighborhood is the proximity and quality of local brewpubs, establishments that sell beer brewed on the premises and include a restaurant.
+
+The project current works with a fixed collection of 5 brewpubs in the San Diego area.
+
 
 ## Steps to Run the Application
+Download the repository from github
+In the js folder create a keys.js file. Replace the NEED_TOKEN strings with the appropriate API tokens from Google and Yelp  
+
+var auth= {
+    GOOGLE_MAP_KEY : 'NEED_TOKEN',
+    YELP_KEY : 'NEED_TOKEN',
+    YELP_KEY_SECRET : 'NEED_TOKEN',
+    YELP_TOKEN : 'NEED_TOKEN',
+    YELP_TOKEN_SECRET : 'NEED_TOKEN'
+};
+
+Load index.html from a web-browser.
 
 
-## References
-
-
-### Useful Real Estate Sites
-http://www.propertyshark.com/mason/  (owned by yardi)
-neighborhoodscout.com
-movoto.com
-city-data.com
-areavibes.com
-streetadvisor.com
-
-### Hazard Mitigation
-http://myplan.calema.ca.gov
-
-### Residential Real Estate
-http://www.programmableweb.com/news/40-real-estate-apis-zillow-trulia-walk-score/2012/02/15
-http://developer.trulia.com
-https://www.walkscore.com/professional/api.php
-
-### Business Real Estate
-zoomprospector.com
-loopnet
-showcase
-pinpoint .acquire by foursqare
-
-### Demographics
-http://www.census.gov/developers/
-esri.com
-
-nielsen: (acquired claritas, prizm)
-https://segmentationsolutions.nielsen.com/mybestsegments/
-
-### Crime
-crimereports.com
-
-### Beer
-http://beermapping.com/maps/citymaps.php?m=sandiego#lat=undefined&lng=undefined&z=7
-
-### Good resources
+## References & Resources
 
 Style Guide
 https://udacity.github.io/frontend-nanodegree-styleguide/index.html
@@ -78,7 +57,6 @@ https://discussions.udacity.com/t/how-do-you-keep-your-google-api-key-secret/969
 https://discussions.udacity.com/t/api-keys-stored-in-repositories/3677
 https://discussions.udacity.com/t/yelp-api-ajax-request/15747/9
 https://help.github.com/articles/remove-sensitive-data/
-
 https://discussions.udacity.com/t/markers-cant-bounce-and-show-information-box-after-1-click/34482
 
 ### Cross Domain Issues & YQL Hack
@@ -87,3 +65,38 @@ http://makina-corpus.com/blog/metier/2013/dealing-with-cross-domain-issues
 ### Well Organized but not async
 https://github.com/peterchon/nanodegree-neighborhood-map-project/blob/gh-pages/js/app-engine.js
 https://github.com/geng0610/FEND-P5-NeighborhoodMap
+
+### Beer
+http://beermapping.com/maps/citymaps.php?m=sandiego#lat=undefined&lng=undefined&z=7
+
+### Useful Real Estate Sites
+http://www.propertyshark.com/mason/  (owned by yardi)
+neighborhoodscout.com
+movoto.com
+city-data.com
+areavibes.com
+streetadvisor.com
+
+### Hazard Mitigation
+http://myplan.calema.ca.gov
+
+### Residential Real Estate
+http://www.programmableweb.com/news/40-real-estate-apis-zillow-trulia-walk-score/2012/02/15
+http://developer.trulia.com
+https://www.walkscore.com/professional/api.php
+
+### Business Real Estate
+zoomprospector.com
+loopnet
+showcase
+pinpoint .acquire by foursqare
+
+### Demographics
+http://www.census.gov/developers/
+esri.com
+
+Nielsen: (acquired claritas, prizm)
+https://segmentationsolutions.nielsen.com/mybestsegments/
+
+### Crime
+crimereports.com

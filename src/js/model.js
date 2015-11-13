@@ -101,5 +101,24 @@ var initialBrewpubs = [
         },
         rating: 4,
         url: 'http://www.yelp.com/biz/the-regal-beagle-san-diego-2'
+    },
+    {
+        display_phone: '+1-619-999-8888',
+        id: 'fake-brewpub-no-yelp',
+        name: 'Fake Brewpub With No Yelp Info',
+        phone: '6199998888',
+        location: {
+            address: [ 'xxx India St'],
+            city: 'San Diego',
+            coordinate: {
+                latitude: 32.751882,
+                longitude: -117.161882
+            },
+            country_code: 'US',
+            postal_code: '92101',
+            state_code: 'CA,'
+        },
+        rating: 4,
+        url: 'http://www.verycleverdesign.com'
     }
 ];
