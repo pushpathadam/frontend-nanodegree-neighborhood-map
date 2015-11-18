@@ -1,11 +1,23 @@
 //Globals
-var map;                                    //google map
-var geocoder;                                   //store new location
-var searchArea = ko.observable("San Diego City, CA");             //only if we query user location
+var initialLocation = {
+        place: 'San Diego,CA',
+        location : {lat: 32.7150, lng: -117.1625}
+    };
+var map;
+var geocoder;
+var searchArea      = ko.observable("San Diego City, CA");
+var updateSearchArea;
+var searchCenter;
 
-var allBrewpubs = ko.observableArray([]);   //container of all brewpub objects
+var allBrewpubs     = ko.observableArray([]);   //container of all brewpub objects
 var query           = ko.observable("");    //search query string
 var selection       = ko.observable("");    //selection triggers lots of things
+
+var selectionName   = ko.computed(function(){
+    var tempName = selection().split(':');
+    return tempName[0];
+});
+
 var selectionIndex  = ko.computed(function (){
     for (var i =0; i < allBrewpubs().length ;i++){
         if (selection()=== allBrewpubs()[i].name){
@@ -13,11 +25,15 @@ var selectionIndex  = ko.computed(function (){
         };
     };
 });
+
+//Doesn't make sense
 var selectedPub = ko.computed(function(){
     return allBrewpubs()[selectionIndex()];
 });
-var infoWindowText = ko.observable("");     //TBD
-                                            //current search result
+
+var infoWindowText = ko.observable("");
+
+//current search result
 var searchResults = {
         detailsResults : ko.observable(),
         pubName : ko.observable(),
@@ -36,6 +52,8 @@ var searchResults = {
 function YelpSearch(){
     //console.log("in YelpQuery");
     var self=this;
+    //var address = document.getElementById("address").value;
+
     self.getDetails = ko.computed(function(){
 
         var yelp_url = 'http://api.yelp.com/v2/search';
@@ -52,8 +70,12 @@ function YelpSearch(){
             oauth_signature_method: 'HMAC-SHA1',
             oauth_version : '1.0',
             callback: 'cb',                 // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
-            term: selection(),              // This observable pushes an evaluation!
-            location: "San Diego, CA",
+            //term: selection(),
+            term: selectionName(),              // This observable pushes an evaluation of just the place name
+
+            location: searchArea(),
+            //category_filter: 'breweries',
+            category_filter: 'breweries,pubs',
             limit: '1'
         };
         //console.log("yelpSearch-1 getDetails: ", parameters);
@@ -81,21 +103,27 @@ function YelpSearch(){
                     searchResults.url(results.businesses[0].url);
                     searchResults.stars(results.businesses[0].rating_img_url_small);
                     searchResults.snippet(results.businesses[0].snippet_text);
-                    console.log("yelpSearch-5: pubname",searchResults.pubName());
+                    //console.log("yelpSearch-5: pubname",searchResults.pubName());
 
                     //only update after query returns defined results
-                    if (searchResults.pubName()!= null) {
+
+                    if ((searchResults.pubName()!= null) && (selectedPub())) {
                         //temp = infoWindowText();
                         //console.log("yelpSearch-6: windowText",temp);
+                        //console.log("yelpSearch-6:",selectedPub());
                         selectedPub().selected();
                     };
+
+
+                    //clear selection
+                    selection("");
 
             },
             error:function(jqXHR, textStatus, errorThrown) {
                 //dostuff
                 // need message sorry couldnt find any info on this business on yelp
                 alert("Geocode was not successful for the following reason: " + textStatus);
-                console.log("yelpSearch-error");
+                //console.log("yelpSearch-error");
             }
         };
 
@@ -113,15 +141,45 @@ function YelpSearch(){
 // create and format infoWindow Contents
 function updateInfoWindowText(name,codelocation){
     //console.log("debug InfoWindoText:",name, searchResults.pubName());
-    if (name!=searchResults.pubName()){
+    //need to match name and searchResults
+
+    //Need major cleanup
+    //cleanName
+    //cleanSearchName
+
+    var pubName = name.split(":")[0];
+    var pubSearchName = searchResults.pubName();
+
+    var cleanPubName = pubName.toLowerCase().replace(/\./g,"");
+    var cleanPubSearchName = pubSearchName.toLowerCase().replace(/\./g,"");
+
+    infoWindowText('<div id="container-pub">'+
+    '<h2 class= "info-location-name">'+
+    pubName+
+    '</h2>'+
+    '<p>'+ "loading info ..." +
+    '</p>' +
+    '</div>');
+
+    //if (name!=searchResults.pubName()){
+    /*
+    if (cleanPubSearchName){
+        console.log("debug: pubSearchName",pubSearchName);
+        console.log("debug:", pubSearchName, pubName,pubSearchName.includes(pubName));
+    };
+    */
+
+    if (cleanPubSearchName===""){
         infoWindowText('<div id="container-pub">'+
         '<h2 class= "info-location-name">'+
-        name+
+        pubName+
         '</h2>'+
-        '<p>'+ "loading info ..." +
+        '<p>'+ "looks like there's no yelp information ..." +
         '</p>' +
         '</div>');
-    } else {
+    } else if ( cleanPubSearchName && ((cleanPubSearchName.includes(cleanPubName)) || (cleanPubName.includes(cleanPubSearchName)))){
+        console.log("true",cleanPubSearchName,cleanPubName);
+
         infoWindowText('<div id="container-pub">'+
         '<h2 class= "info-location-name">'+
         searchResults.pubName()+ '&nbsp &nbsp <a href="tel:'+searchResults.ph()+'">' +
@@ -137,18 +195,31 @@ function updateInfoWindowText(name,codelocation){
         '<a href="' + searchResults.url() + '"> Read more</a>' +
         '</p>' +
         '</div>');
-
-    }
+    } else {
+        infoWindowText('<div id="container-pub">'+
+        '<h2 class= "info-location-name">'+
+        pubName+
+        '</h2>'+
+        '<p>'+ "looks like no info on yelp or the business is named differently ..." +
+        '</p>' +
+        '</div>');
+    };
 
 };
 
 //single brewpub location
-function brewpub(currentBrewpub){;
+//function brewpub(currentBrewpub){;
+function brewpub(name,address,lat,lon){;
 
     var self = this;
-    self.name = currentBrewpub.name;
-    self.lat = currentBrewpub.location.coordinate.latitude;
-    self.lng = currentBrewpub.location.coordinate.longitude;
+    //self.name = currentBrewpub.name;
+    //self.lat = currentBrewpub.location.coordinate.latitude;
+    //self.lng = currentBrewpub.location.coordinate.longitude;
+    self.name = name;
+    self.address = address;
+    self.lat = lat;
+    self.lng = lon;
+
     self.image = {url:"img/beerpub-icon.png"};
     self.imageSelected = {url:"img/beerpub-icon-selected.png"};
 
@@ -308,60 +379,148 @@ function GoogleMapViewModel(){
     var self = this;
     var city = initialLocation;
 
+    // finds breweries within 10km of the search center
+    // brewery is the closest keyword to brewpub
+    // specifying types as bar limits the results further
+    var searchNearby =function(){
+        var request = {
+            location: searchCenter,
+            radius: '10000',
+            //types: ['restaurant','bar'],
+            //types: ['bar','restaurant'],
+            keyword: 'brewery'
+        };
+        var service = new google.maps.places.PlacesService(map);
+        console.log("request",request);
+
+        service.nearbySearch(request, function(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+
+                console.log("debug: PlaceServiceStatus results", results);
+                //clean out allBrewpubs
+                allBrewpubs.removeAll();
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    var address = place.vicinity.split(",");
+                    var uniqueName = place.name + ":" +  address[0];
+                    var neighborhood = address[1];
+
+                    console.log("debug", uniqueName, neighborhood, place.name,place.geometry.location.lat(), place.geometry.location.lng())
 
 
-    //search for city
-    /*
-    function geocodeAddress(address,callback){
+                    // create initial markers
+
+                    //allBrewpubs.push(new brewpub(place.name,place.vicinity,place.geometry.location.lat(),place.geometry.location.lng()));
+                    allBrewpubs.push(new brewpub(uniqueName,place.vicinity,place.geometry.location.lat(),place.geometry.location.lng()));
+
+                    console.log("debug: add pub", allBrewpubs()[i].name, allBrewpubs()[i].lat,allBrewpubs()[i].lng);
+
+                };
+                infoWindowText("");
+
+                drawMap();
+
+            } else {
+                alert("Search was not successful for the following reason: ", status);
+            };
+        });
+    }; // End of searchNearby
+
+    // updates center of searchArea and map
+    updateSearchArea = function(){
+        //searchArea = document.getElementById("address").value;
         //var address = document.getElementById("address").value;
-        //var address = searchArea();
+        var address = searchArea();
+        //var address = searchArea;
         geocoder = new google.maps.Geocoder();
-        var latlng = new Array(2);
-        //var address = "16811 Escalon Dr, Encino, CA 91436";
-        console.log("in CodeAddress:", address);
 
+        console.log("in CodeAddress:", address);
         geocoder.geocode( { 'address': address}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
-            //map.setCenter(results[0].geometry.location);
 
-            //var marker = new google.maps.Marker({
-            //    map: map,
-            //    position: results[0].geometry.location
-            //});
-            latlng[0]= results[0].geometry.location.lat();
-            lanlng[1]= results[0].geometry.location.lng();
+              console.log("searchCenter:", searchCenter.lat(),searchCenter.lng());
+              //searchCenter.LatLng.lat= results[0].geometry.location.lat();
 
-            console.log("ok",latlng[0],latlng[1]);
+              //searchCenter.LatLng.lng= results[0].geometry.location.lng();
+              searchCenter= new google.maps.LatLng(results[0].geometry.location.lat(),results[0].geometry.location.lng());
+              console.log("updating-searchCenter:", searchCenter.lat(),searchCenter.lng());
 
-            callback(latlng);
+            //map.setCenter({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()});
 
+            map.setCenter(searchCenter);
+            map.setZoom(12);
+
+            /*
+            var marker = new google.maps.Marker({
+                map: map,
+                position: searchCenter
+            });
+            */
+
+            searchNearby();
           } else {
-            alert("Geocode was not successful for the following reason: " + status);
+            alert("Geocode was not successful for the following reason: ", status);
           }
+
         });
-    };
-    */
-
-    self.latlng = new google.maps.LatLng(city.location.lat, city.location.lng);
-
-    self.mapOptions = {
-        center: {lat: city.location.lat, lng: city.location.lng},
-        zoom: 12,
-    };
+    }; //End of updateSearchArea
 
 
-    //creating global map
-    //map = new google.maps.Map(document.getElementById('map-canvas'),this.mapOptions);
+    // updates map & binds markers
+    function drawMap(){
+        //for (var i = 0; i < initialBrewpubs.length; i++){
+        for (var i = 0; i < allBrewpubs().length; i++){
+                allBrewpubs()[i].marker().setMap(null);
+        };
 
-    //map = new google.maps.Map(document.getElementById('map-canvas'));
-    //geocoder = new google.maps.Geocoder();
+        // filtered venues?
+        //for (var i = 0; i < initialBrewpubs.length; i++){
+        for (var i = 0; i < allBrewpubs().length; i++){
+                allBrewpubs()[i].marker().setMap(map);
+                //console.log("debug:in drawMap", allBrewpubs()[i].name);
 
-    //geocodeAddress(searchArea(),function(search_latlng));
-    //console.log("city", city);
+                function brewDetail(title){
+                    //for (var i = 0; i < initialBrewpubs.length; i++){
+                    for (var i = 0; i < allBrewpubs().length; i++){
+                            //clear out infowindows
+                            allBrewpubs()[i].notselected();
+                            console.log("debug:brewDetail:", title, allBrewpubs()[i].name)
+                            if (title === allBrewpubs()[i].name) {
+                                allBrewpubs()[i].selected();
+                            }
+                    };
+                };
+
+                function cleanup(){
+                    //for (var i = 0; i < initialBrewpubs.length; i++){
+                    for (var i = 0; i < allBrewpubs().length; i++){
+                            //clear out infowindows
+                            allBrewpubs()[i].notselected();
+                    };
+                };
+
+                google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
+                    //focusOnLocationWithDetail(this);
+                    //want to showInfoWindow
+
+                    brewDetail(this.title);
+                    //brewDetail2(this.title);
+                    //trigger details view
+                    selection(this.title);
+                    //console.log("marker title",this);
+                });
+                google.maps.event.addListener(allBrewpubs()[i].infoWindow,'closeclick',function(){
+                    //asking to close already closed window
+                    cleanup();
+                    //console.log("closing",selection());
+                });
+        };
+    }; // end drawMap
 
     map = new google.maps.Map(document.getElementById('map-canvas'));
-    map.setCenter(self.mapOptions.center);
-    map.setZoom(self.mapOptions.zoom);
+    searchCenter= new google.maps.LatLng(0,0);
+
+    updateSearchArea();
     //map.fitBounds(bounds)
 
     // adjust color of the global map to make more monochrome look
@@ -380,76 +539,7 @@ function GoogleMapViewModel(){
         }
     ]);
 
-    // create initial markers
-    for (var i = 0; i < initialBrewpubs.length; i++){
-                allBrewpubs.push(new brewpub(initialBrewpubs[i]));
-                allBrewpubs()[i].marker().setMap(null);
-    };
-
-    // updates map
-    function drawMap(){
-        for (var i = 0; i < initialBrewpubs.length; i++){
-                allBrewpubs()[i].marker().setMap(null);
-        };
-
-        // filtered venues?
-        for (var i = 0; i < initialBrewpubs.length; i++){
-                allBrewpubs()[i].marker().setMap(map);
-                //console.log("in drawMap", allBrewpubs()[i].name);
-
-                function brewDetail(title){
-                    for (var i = 0; i < initialBrewpubs.length; i++){
-                            //clear out infowindows
-                            allBrewpubs()[i].notselected();
-                            console.log("debug:brewDetail:", title,allBrewpubs()[i].name)
-                            if (title === allBrewpubs()[i].name) {
-                                allBrewpubs()[i].selected();
-                            }
-                    };
-                    //selectedPub().selected();
-                };
-
-                function cleanup(){
-                    for (var i = 0; i < initialBrewpubs.length; i++){
-                            //clear out infowindows
-                            allBrewpubs()[i].notselected();
-                    };
-                };
-
-                google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
-                    //focusOnLocationWithDetail(this);
-                    //want to showInfoWindow
-
-                    brewDetail(this.title);
-                    //trigger details view
-                    selection(this.title);
-                    //console.log("marker title",this);
-                });
-                google.maps.event.addListener(allBrewpubs()[i].infoWindow,'closeclick',function(){
-                    //asking to close already closed window
-                    cleanup();
-                    //console.log("closing",selection());
-                });
-        };
-
-
-
-    };
-
-    // cleans up map
-    /*
-    function cleanMap(){
-        if(infoWindow){infoWindow.close()};
-        infoWindowText("");
-    };
-    //cleanMap();
-    */
-
-    infoWindowText("");
-
-    drawMap();
-
-};
+}; // End of GoogleMapViewModel
 
 
 // master ViewModel to manage binding from multiple sub view models

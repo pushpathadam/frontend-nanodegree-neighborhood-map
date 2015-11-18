@@ -46,7 +46,7 @@
 
         <div id="main">
             <header class="header">
-                <h1>San Diego Brewpub Finder</h1>
+                <h1>Brewpub Finder</h1>
             </header>
             <div class="content">
                 <div>
@@ -60,6 +60,27 @@
                         <input type="button" value="TestGoogleGeoFinder" onclick="masterVM().mapViewModel(searchArea()).drawMap()"></input>
                     </div>
                     -->
+                    <div class="location-container">
+                        <form class="pure-form">
+                                <fieldset>
+
+                                        <input id="address" data-bind="textInput: searchArea" autocomplete="off"></input>
+
+                                    <!--<input id="address" type="textbox" value="San Diego, CA ">-->
+                                        <input class="pure-button pure-button-primary" type="button" data-bind="click: updateSearchArea" value = "Update the map center" ></input>
+                                </fieldset>
+
+                        </form>
+
+                        <!--
+                        <form id="map-center" data-bind="submit: updateSearchArea">
+
+                            <label><input id = "address" type = "text" name="searchArea"/></label>
+                            <label><input type = "submit" name="submit" value="Submit"/></label>
+
+                        </form>
+                        -->
+                    </div>
 
                     <!-- Compartmentalized ViewModel for Google Maps-->
                     <div class="map-container">
@@ -79,12 +100,13 @@
             -->
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-            <script src ="js/model.js"></script>
+
             <!--
+            <script src ="js/model.js"></script>
             <script src ="js/lib/ui.js"></script>
         -->
             <script src ="js/app.js"></script>
-            <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&callback=googleSuccess" onerror="googleError()"></script>
+            <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvYTVhEr4vF8DXmtS65haCb0HZ4s4ikkk&libraries=places&callback=googleSuccess" onerror="googleError()"></script>
 
             <footer> </footer>
         </div>

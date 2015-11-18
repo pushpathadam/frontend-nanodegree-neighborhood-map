@@ -6,10 +6,13 @@
     padding: 0 10px 0 10px;
 }
 input {
-    width: 200px;
+    width: 300px;
 }
 
 legend {
     font-weight: 700;
     color: #fff;
+}
+h1 {
+    text-align: left;
 }
