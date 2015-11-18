@@ -178,7 +178,7 @@ function updateInfoWindowText(name,codelocation){
         '</p>' +
         '</div>');
     } else if ( cleanPubSearchName && ((cleanPubSearchName.includes(cleanPubName)) || (cleanPubName.includes(cleanPubSearchName)))){
-        console.log("true",cleanPubSearchName,cleanPubName);
+        //console.log("true",cleanPubSearchName,cleanPubName);
 
         infoWindowText('<div id="container-pub">'+
         '<h2 class= "info-location-name">'+
@@ -263,8 +263,11 @@ function brewpub(name,address,lat,lon){;
     //displays an infoWindow in mapViewModel
     self.selected = function(){
         self.toggleBounce();
-        self.toggleSelected(self.name);
-        updateInfoWindowText(self.name,"selected");
+        // with async need to check for valid returns from yelp
+        if (self.name){
+            self.toggleSelected(self.name);
+            updateInfoWindowText(self.name,"selected");
+        }
         self.infoWindow.setContent(infoWindowText());
         self.infoWindow.open(map, self.marker());
     };
@@ -284,8 +287,6 @@ function ListViewModel(){
     //console.log("in ListViewModel");
 
     var self = this;
-
-    self.testb = function(){console.log("testbutton")};
 
     self.layout = $('#layout').get(0);
     self.menu = $('#menu').get(0);
@@ -345,7 +346,7 @@ function ListViewModel(){
                     self.tempBrewpub.push(allBrewpubs()[i]);
                 };
             };
-            console.log("search matches", self.tempBrewpub);
+            //console.log("debug: search matches", self.tempBrewpub);
             return self.tempBrewpub;
         }
     });
@@ -379,9 +380,9 @@ function GoogleMapViewModel(){
     var self = this;
     var city = initialLocation;
 
-    // finds breweries within 10km of the search center
+    // finds brewpubs within 10km of the search center
     // brewery is the closest keyword to brewpub
-    // specifying types as bar limits the results further
+    // specifying types as bar limits the results further but with odd omissions
     var searchNearby =function(){
         var request = {
             location: searchCenter,
@@ -391,12 +392,12 @@ function GoogleMapViewModel(){
             keyword: 'brewery'
         };
         var service = new google.maps.places.PlacesService(map);
-        console.log("request",request);
+        //console.log("debug: request",request);
 
         service.nearbySearch(request, function(results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
 
-                console.log("debug: PlaceServiceStatus results", results);
+                //console.log("debug: PlaceServiceStatus results", results);
                 //clean out allBrewpubs
                 allBrewpubs.removeAll();
                 for (var i = 0; i < results.length; i++) {
@@ -405,15 +406,12 @@ function GoogleMapViewModel(){
                     var uniqueName = place.name + ":" +  address[0];
                     var neighborhood = address[1];
 
-                    console.log("debug", uniqueName, neighborhood, place.name,place.geometry.location.lat(), place.geometry.location.lng())
-
+                    //console.log("debug", uniqueName, neighborhood, place.name,place.geometry.location.lat(), place.geometry.location.lng())
 
                     // create initial markers
-
-                    //allBrewpubs.push(new brewpub(place.name,place.vicinity,place.geometry.location.lat(),place.geometry.location.lng()));
                     allBrewpubs.push(new brewpub(uniqueName,place.vicinity,place.geometry.location.lat(),place.geometry.location.lng()));
 
-                    console.log("debug: add pub", allBrewpubs()[i].name, allBrewpubs()[i].lat,allBrewpubs()[i].lng);
+                    //console.log("debug: add pub", allBrewpubs()[i].name, allBrewpubs()[i].lat,allBrewpubs()[i].lng);
 
                 };
                 infoWindowText("");
@@ -434,16 +432,16 @@ function GoogleMapViewModel(){
         //var address = searchArea;
         geocoder = new google.maps.Geocoder();
 
-        console.log("in CodeAddress:", address);
+        //console.log("debug: in CodeAddress:", address);
         geocoder.geocode( { 'address': address}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
 
-              console.log("searchCenter:", searchCenter.lat(),searchCenter.lng());
+              //console.log("debug: searchCenter:", searchCenter.lat(),searchCenter.lng());
               //searchCenter.LatLng.lat= results[0].geometry.location.lat();
 
               //searchCenter.LatLng.lng= results[0].geometry.location.lng();
               searchCenter= new google.maps.LatLng(results[0].geometry.location.lat(),results[0].geometry.location.lng());
-              console.log("updating-searchCenter:", searchCenter.lat(),searchCenter.lng());
+              //console.log("debug: updating-searchCenter:", searchCenter.lat(),searchCenter.lng());
 
             //map.setCenter({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()});
 
@@ -484,7 +482,7 @@ function GoogleMapViewModel(){
                     for (var i = 0; i < allBrewpubs().length; i++){
                             //clear out infowindows
                             allBrewpubs()[i].notselected();
-                            console.log("debug:brewDetail:", title, allBrewpubs()[i].name)
+                            //console.log("debug:brewDetail:", title, allBrewpubs()[i].name)
                             if (title === allBrewpubs()[i].name) {
                                 allBrewpubs()[i].selected();
                             }
@@ -561,7 +559,8 @@ function googleSuccess() {
 
     } else {
                 // google maps didn't load
-                console.log("google maps didn't load");
+                alert("google maps didn't load");
+                //console.log("google maps didn't load");
     };
 
     // Sets the boundaries of the map based on pin locations
@@ -573,5 +572,6 @@ function googleSuccess() {
 
 // callback for failed google maps loading
 function googleError() {
-    console.log("google maps didn't load");
+    alert("google maps didn't load");
+    //console.log("google maps didn't load");
 }

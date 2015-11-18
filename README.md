@@ -1,9 +1,9 @@
 # Frontend Nanodegree Neighborhood Map Project
 
-After looking at several existing applications that provide neighborhood information I found that currently the
-most accessible metric for assessing a neighborhood is the proximity and quality of local brewpubs, establishments that sell beer brewed on the premises and include a restaurant.
+After looking at several existing applications that provide neighborhood information I found that an
+accessible metric for assessing a neighborhood is the proximity and quality of local brewpubs, establishments that sell beer brewed on the premises and might also a restaurant.
 
-The project current works with a fixed collection of 5 brewpubs in the San Diego area.
+The project current mashes up Google Places results with Yelp reviews. A stumbling block to fully realize this is that the same establishment is often named and categorized differently by each service.  A human can figure it out, its not trivial to program matches.
 
 
 ## Steps to Run the Application

@@ -1,7 +1,7 @@
 /* for google maps */
-
 /*html, body { height: 100%; margin: 0; padding: 0; }*/
 /*map-canvas { height: 400px; }*/
+
 #map-search {
     padding: 0 10px 0 10px;
 }
@@ -14,5 +14,12 @@ legend {
     color: #fff;
 }
 h1 {
+    text-align: left;
+}
+
+.pure-button-primary {
+    background-color: #f9bc2c;
+}
+header p {
     text-align: left;
 }
