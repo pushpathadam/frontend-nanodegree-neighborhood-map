@@ -3,3 +3,4 @@ keys.js
 old-app.js
 old-*
 *.ai
+node_modules/*

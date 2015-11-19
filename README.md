@@ -20,6 +20,8 @@ var auth= {
 
 Load index.html from a web-browser.
 
+Setup git in your project folder. The contents that would be normally in /node-module are not included in this repository. They worked but
+ballooned to over a 1000 files?
 
 ## References & Resources
 
