@@ -7,29 +7,19 @@ The project current mashes up Google Places results with Yelp reviews. A stumbli
 
 
 ## Steps to Run the Application
-Download the repository from github
-In the js folder create a keys.js file. Replace the NEED_TOKEN strings with the appropriate API tokens from Google and Yelp  
+Download the repository from github.
 
-var auth= {
-    GOOGLE_MAP_KEY : 'NEED_TOKEN',
-    YELP_KEY : 'NEED_TOKEN',
-    YELP_KEY_SECRET : 'NEED_TOKEN',
-    YELP_TOKEN : 'NEED_TOKEN',
-    YELP_TOKEN_SECRET : 'NEED_TOKEN'
-};
-
-Load index.html from a web-browser.
-
-Setup git in your project folder. The contents that would be normally in /node-module are not included in this repository. They worked but
-ballooned to over a 1000 files?
+Setup git in your project folder. Run gulp all. It will run these tasks:
+    uglify: uglify app.js and key.js files
+    jsmove: move already minified library files from src to dist
+    minifyCSS: minify my local css files and move these versions to dist
+    imagemove: copy icons files to dist
+    minifyhtml: minify my html files
+    Load dist/index.html
 
 ## Gulp tasks
 
-uglify: uglify app.js and key.js files
-jsmove: move already minified library files from src to dist
-minifyCSS: minify my local css files and move these versions to dist
-imagemove: copy icons files to dist
-minifyhtml: minify my html files
+
 
 
 ## References & Resources
