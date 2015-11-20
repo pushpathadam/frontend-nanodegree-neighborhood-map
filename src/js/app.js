@@ -22,11 +22,10 @@ var selectionIndex  = ko.computed(function (){
     for (var i =0; i < allBrewpubs().length ;i++){
         if (selection()=== allBrewpubs()[i].name){
             return i;
-        };
-    };
+        }
+    }
 });
 
-//Doesn't make sense
 var selectedPub = ko.computed(function(){
     return allBrewpubs()[selectionIndex()];
 });
@@ -52,14 +51,10 @@ var searchResults = {
 function YelpSearch(){
     //console.log("in YelpQuery");
     var self=this;
-    //var address = document.getElementById("address").value;
 
     self.getDetails = ko.computed(function(){
 
         var yelp_url = 'http://api.yelp.com/v2/search';
-        //var yelpRequestTimeout = setTimeout(function(){
-        //    $yelp-elem.text("failed to get yelp resources");
-        //}, 8000);
         var nonce_generate = Math.floor(Math.random() * 1e12).toString();
 
         var parameters = {
@@ -70,11 +65,8 @@ function YelpSearch(){
             oauth_signature_method: 'HMAC-SHA1',
             oauth_version : '1.0',
             callback: 'cb',                 // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
-            //term: selection(),
             term: selectionName(),              // This observable pushes an evaluation of just the place name
-
             location: searchArea(),
-            //category_filter: 'breweries',
             category_filter: 'breweries,pubs',
             limit: '1'
         };
@@ -107,13 +99,11 @@ function YelpSearch(){
 
                     //only update after query returns defined results
 
-                    if ((searchResults.pubName()!= null) && (selectedPub())) {
-                        //temp = infoWindowText();
+                    if ((searchResults.pubName()!== null) && (selectedPub())) {
                         //console.log("yelpSearch-6: windowText",temp);
                         //console.log("yelpSearch-6:",selectedPub());
                         selectedPub().selected();
-                    };
-
+                    }
 
                     //clear selection
                     selection("");
@@ -121,100 +111,86 @@ function YelpSearch(){
             },
             error:function(jqXHR, textStatus, errorThrown) {
                 //dostuff
-                // need message sorry couldnt find any info on this business on yelp
                 alert("Geocode was not successful for the following reason: " + textStatus);
-                //console.log("yelpSearch-error");
             }
         };
 
         //console.log(yelp_url, settings.data);
         // tests if anything is selected before ajax call
-        if ((selection() != null) && (selection() != "")) {
+        if ((selection() !== null) && (selection() !== "")) {
             //console.log("yelpSearch-2:", selection());
             //console.log("yelpSearch-3 term: ",  parameters.term);
             $.ajax(settings);
-        };
+        }
     });
 
-}; //End of YelpSearch
+} //End of YelpSearch
 
 // create and format infoWindow Contents
 function updateInfoWindowText(name,codelocation){
-    //console.log("debug InfoWindoText:",name, searchResults.pubName());
+
     //need to match name and searchResults
 
-    //Need major cleanup
-    //cleanName
-    //cleanSearchName
-
     var pubName = name.split(":")[0];
-    var pubSearchName = searchResults.pubName();
 
-    var cleanPubName = pubName.toLowerCase().replace(/\./g,"");
-    var cleanPubSearchName = pubSearchName.toLowerCase().replace(/\./g,"");
+    if (searchResults.pubName()){
+        var pubSearchName = searchResults.pubName();
+        //console.log("debug InfoWindowText:",name, searchResults.pubName());
 
-    infoWindowText('<div id="container-pub">'+
-    '<h2 class= "info-location-name">'+
-    pubName+
-    '</h2>'+
-    '<p>'+ "loading info ..." +
-    '</p>' +
-    '</div>');
+        var cleanPubName = pubName.toLowerCase().replace(/\./g,"");
+        var cleanPubSearchName = pubSearchName.toLowerCase().replace(/\./g,"");
 
-    //if (name!=searchResults.pubName()){
-    /*
-    if (cleanPubSearchName){
-        console.log("debug: pubSearchName",pubSearchName);
-        console.log("debug:", pubSearchName, pubName,pubSearchName.includes(pubName));
-    };
-    */
-
-    if (cleanPubSearchName===""){
         infoWindowText('<div id="container-pub">'+
         '<h2 class= "info-location-name">'+
         pubName+
         '</h2>'+
-        '<p>'+ "looks like there's no yelp information ..." +
+        '<p>'+ "loading info ..." +
         '</p>' +
         '</div>');
-    } else if ( cleanPubSearchName && ((cleanPubSearchName.includes(cleanPubName)) || (cleanPubName.includes(cleanPubSearchName)))){
-        //console.log("true",cleanPubSearchName,cleanPubName);
 
-        infoWindowText('<div id="container-pub">'+
-        '<h2 class= "info-location-name">'+
-        searchResults.pubName()+ '&nbsp &nbsp <a href="tel:'+searchResults.ph()+'">' +
-        searchResults.dph()+
-        '</a></h2>'+
-        '<p>'+
-        searchResults.address()+
-        '<br>' +
-        '</p>'+
-        '<img src="' + searchResults.stars() + '" height="17" width ="84">' +
-        '<p>'+
-        searchResults.snippet()+
-        '<a href="' + searchResults.url() + '"> Read more</a>' +
-        '</p>' +
-        '</div>');
-    } else {
-        infoWindowText('<div id="container-pub">'+
-        '<h2 class= "info-location-name">'+
-        pubName+
-        '</h2>'+
-        '<p>'+ "looks like no info on yelp or the business is named differently ..." +
-        '</p>' +
-        '</div>');
-    };
+        if (cleanPubSearchName===""){
+            infoWindowText('<div id="container-pub">'+
+            '<h2 class= "info-location-name">'+
+            pubName+
+            '</h2>'+
+            '<p>'+ "looks like there's no yelp information ..." +
+            '</p>' +
+            '</div>');
+        } else if ( cleanPubSearchName && ((cleanPubSearchName.includes(cleanPubName)) || (cleanPubName.includes(cleanPubSearchName)))){
+            //console.log("true",cleanPubSearchName,cleanPubName);
 
-};
+            infoWindowText('<div id="container-pub">'+
+            '<h2 class= "info-location-name">'+
+            searchResults.pubName()+ '&nbsp &nbsp <a href="tel:'+searchResults.ph()+'">' +
+            searchResults.dph()+
+            '</a></h2>'+
+            '<p>'+
+            searchResults.address()+
+            '<br>' +
+            '</p>'+
+            '<img src="' + searchResults.stars() + '" height="17" width ="84">' +
+            '<p>'+
+            searchResults.snippet()+
+            '<a href="' + searchResults.url() + '"> Read more</a>' +
+            '</p>' +
+            '</div>');
+        } else {
+            infoWindowText('<div id="container-pub">'+
+            '<h2 class= "info-location-name">'+
+            pubName+
+            '</h2>'+
+            '<p>'+ "looks like no info on yelp or the business is named differently ..." +
+            '</p>' +
+            '</div>');
+        }
+    }
+
+} //End of updateInfoWindowText
 
 //single brewpub location
-//function brewpub(currentBrewpub){;
-function brewpub(name,address,lat,lon){;
+function brewpub(name,address,lat,lon){
 
     var self = this;
-    //self.name = currentBrewpub.name;
-    //self.lat = currentBrewpub.location.coordinate.latitude;
-    //self.lng = currentBrewpub.location.coordinate.longitude;
     self.name = name;
     self.address = address;
     self.lat = lat;
@@ -234,7 +210,7 @@ function brewpub(name,address,lat,lon){;
             icon: self.image,
             position: new google.maps.LatLng(self.lat, self.lng),
             title: self.name
-        })
+        });
     });
 
     //changes marker color and adds animation in mapViewModel
@@ -248,10 +224,10 @@ function brewpub(name,address,lat,lon){;
             self.marker().setAnimation(google.maps.Animation.BOUNCE);
             setTimeout(function (){
                 self.marker().setAnimation(null);
-                self.marker().setIcon(self.image)
+                self.marker().setIcon(self.image);
             },2000);
 
-        };
+        }
     };
 
     //changes look of selected item in listViewModel
@@ -260,12 +236,16 @@ function brewpub(name,address,lat,lon){;
         $('ul').find('.pure-menu-item').filter(':contains('+pubName+')').addClass("pure-menu-selected");
     };
 
-    //displays an infoWindow in mapViewModel
+    //displays an infoWindow in mapViewModel()
     self.selected = function(){
         self.toggleBounce();
         // with async need to check for valid returns from yelp
         if (self.name){
             self.toggleSelected(self.name);
+            selection("");
+            selection(self.name); //just a string containing name
+
+            //console.log("debug: selected:",self.name);
             updateInfoWindowText(self.name,"selected");
         }
         self.infoWindow.setContent(infoWindowText());
@@ -276,11 +256,11 @@ function brewpub(name,address,lat,lon){;
     self.notselected = function(){
         //self.infoWindow.setContent("");
         $('.pure-menu-item').removeClass("pure-menu-selected");
-
+        //want remove color?
         self.infoWindow.close();
     };
 
-}; //End of brewpub
+} //End of brewpub
 
 // ListViewModel
 function ListViewModel(){
@@ -311,7 +291,8 @@ function ListViewModel(){
         }
 
         element.className = classes.join(' ');
-    }
+    };
+
     //modified function from pure ui.js to work with knockout
     self.toggle = function toggleCall(e) {
         var active = 'active';
@@ -331,7 +312,7 @@ function ListViewModel(){
             for (var i =0; i < allBrewpubs().length ;i++){
                 allBrewpubs()[i].notselected();
                 allBrewpubs()[i].marker().setMap(map);
-            };
+            }
             return self.tempBrewpub;
         } else {
             self.tempBrewpub = [];
@@ -344,8 +325,8 @@ function ListViewModel(){
                 if ((query().length > 0) && (temp.search(query().toLowerCase()) > -1)){
                     allBrewpubs()[i].marker().setMap(map);
                     self.tempBrewpub.push(allBrewpubs()[i]);
-                };
-            };
+                }
+            }
             //console.log("debug: search matches", self.tempBrewpub);
             return self.tempBrewpub;
         }
@@ -366,10 +347,10 @@ function ListViewModel(){
                 //allBrewpubs()[i].toggleSelected(selection());
                 allBrewpubs()[i].toggleBounce();
                 allBrewpubs()[i].marker().setMap(map);
-            };
-        };
+            }
+        }
     };
-}; // End of ListViewModel
+} // End of ListViewModel
 
 
 // GoogleMapViewModel
@@ -387,7 +368,6 @@ function GoogleMapViewModel(){
         var request = {
             location: searchCenter,
             radius: '10000',
-            //types: ['restaurant','bar'],
             //types: ['bar','restaurant'],
             keyword: 'brewery'
         };
@@ -398,6 +378,7 @@ function GoogleMapViewModel(){
             if (status == google.maps.places.PlacesServiceStatus.OK) {
 
                 //console.log("debug: PlaceServiceStatus results", results);
+
                 //clean out allBrewpubs
                 allBrewpubs.removeAll();
                 for (var i = 0; i < results.length; i++) {
@@ -413,21 +394,19 @@ function GoogleMapViewModel(){
 
                     //console.log("debug: add pub", allBrewpubs()[i].name, allBrewpubs()[i].lat,allBrewpubs()[i].lng);
 
-                };
+                }
                 infoWindowText("");
 
                 drawMap();
 
             } else {
                 alert("Search was not successful for the following reason: ", status);
-            };
+            }
         });
     }; // End of searchNearby
 
     // updates center of searchArea and map
     updateSearchArea = function(){
-        //searchArea = document.getElementById("address").value;
-        //var address = document.getElementById("address").value;
         var address = searchArea();
         //var address = searchArea;
         geocoder = new google.maps.Geocoder();
@@ -436,24 +415,11 @@ function GoogleMapViewModel(){
         geocoder.geocode( { 'address': address}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
 
-              //console.log("debug: searchCenter:", searchCenter.lat(),searchCenter.lng());
-              //searchCenter.LatLng.lat= results[0].geometry.location.lat();
-
-              //searchCenter.LatLng.lng= results[0].geometry.location.lng();
               searchCenter= new google.maps.LatLng(results[0].geometry.location.lat(),results[0].geometry.location.lng());
               //console.log("debug: updating-searchCenter:", searchCenter.lat(),searchCenter.lng());
 
-            //map.setCenter({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()});
-
             map.setCenter(searchCenter);
             map.setZoom(12);
-
-            /*
-            var marker = new google.maps.Marker({
-                map: map,
-                position: searchCenter
-            });
-            */
 
             searchNearby();
           } else {
@@ -466,54 +432,47 @@ function GoogleMapViewModel(){
 
     // updates map & binds markers
     function drawMap(){
-        //for (var i = 0; i < initialBrewpubs.length; i++){
+
+        function brewDetail(title){
+            //for (var i = 0; i < initialBrewpubs.length; i++){
+            for (var i = 0; i < allBrewpubs().length; i++){
+                    //clear out infowindows
+                    allBrewpubs()[i].notselected();
+                    //console.log("debug:brewDetail:", title, allBrewpubs()[i].name)
+                    if (title === allBrewpubs()[i].name) {
+                        allBrewpubs()[i].selected();
+                    }
+            }
+        }
+
+        function cleanup(){
+            //for (var i = 0; i < initialBrewpubs.length; i++){
+            for (var i = 0; i < allBrewpubs().length; i++){
+                    //clear out infowindows
+                    allBrewpubs()[i].notselected();
+            }
+        }
+
         for (var i = 0; i < allBrewpubs().length; i++){
                 allBrewpubs()[i].marker().setMap(null);
-        };
+        }
 
-        // filtered venues?
-        //for (var i = 0; i < initialBrewpubs.length; i++){
         for (var i = 0; i < allBrewpubs().length; i++){
                 allBrewpubs()[i].marker().setMap(map);
                 //console.log("debug:in drawMap", allBrewpubs()[i].name);
 
-                function brewDetail(title){
-                    //for (var i = 0; i < initialBrewpubs.length; i++){
-                    for (var i = 0; i < allBrewpubs().length; i++){
-                            //clear out infowindows
-                            allBrewpubs()[i].notselected();
-                            //console.log("debug:brewDetail:", title, allBrewpubs()[i].name)
-                            if (title === allBrewpubs()[i].name) {
-                                allBrewpubs()[i].selected();
-                            }
-                    };
-                };
-
-                function cleanup(){
-                    //for (var i = 0; i < initialBrewpubs.length; i++){
-                    for (var i = 0; i < allBrewpubs().length; i++){
-                            //clear out infowindows
-                            allBrewpubs()[i].notselected();
-                    };
-                };
-
                 google.maps.event.addListener(allBrewpubs()[i].marker(), 'click', function(){
-                    //focusOnLocationWithDetail(this);
-                    //want to showInfoWindow
 
                     brewDetail(this.title);
-                    //brewDetail2(this.title);
-                    //trigger details view
                     selection(this.title);
-                    //console.log("marker title",this);
+                    //console.log("debug: marker title",this);
                 });
                 google.maps.event.addListener(allBrewpubs()[i].infoWindow,'closeclick',function(){
                     //asking to close already closed window
                     cleanup();
-                    //console.log("closing",selection());
                 });
-        };
-    }; // end drawMap
+        }
+    } // end drawMap
 
     map = new google.maps.Map(document.getElementById('map-canvas'));
     searchCenter= new google.maps.LatLng(0,0);
@@ -537,21 +496,19 @@ function GoogleMapViewModel(){
         }
     ]);
 
-}; // End of GoogleMapViewModel
+} // End of GoogleMapViewModel
 
 
 // master ViewModel to manage binding from multiple sub view models
 function masterVM() {
-    //console.log(searchArea());
-    this.mapViewModel = new GoogleMapViewModel()
+    this.mapViewModel = new GoogleMapViewModel();
     this.listViewModel = new ListViewModel();
     this.yelpSearch = new YelpSearch();
-};
+}
 
 // call back for successful async loading of google maps
 function googleSuccess() {
 
-    // geocoder = new google.maps.Geocoder();
     // Seems weird to apply apply view model bindings last but this puts it safely after google loads async
     if (typeof google==='object' && typeof google.maps ==='object'){
 
@@ -560,15 +517,12 @@ function googleSuccess() {
     } else {
                 // google maps didn't load
                 alert("google maps didn't load");
-                //console.log("google maps didn't load");
-    };
+    }
 
     // Sets the boundaries of the map based on pin locations
-    //window.mapBounds = new google.maps.LatLngBounds();
+    // window.mapBounds = new google.maps.LatLngBounds();
 
-      // locations is an array of location strings returned from locationFinder()
-
-};
+}
 
 // callback for failed google maps loading
 function googleError() {

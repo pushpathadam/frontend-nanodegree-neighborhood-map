@@ -29,12 +29,12 @@ This is the parent `<div>` that contains the menu and the content area.
     padding-left: 0;
 }
     #layout.active #menu {
-        left: 352px;
-        width: 352px;
+        left: 382px;
+        width: 382px;
     }
 
     #layout.active .menu-link {
-        left: 352px;
+        left: 382px;
     }
 /*
 The content `<div>` is where all your content goes.
@@ -80,8 +80,8 @@ appears on the left side of the page.
 */
 
 #menu {
-    margin-left: -352px; /* "#menu" width */
-    width: 352px;
+    margin-left: -382px; /* "#menu" width */
+    width: 382px;
     position: fixed;
     top: 0;
     left: 0;
@@ -130,7 +130,7 @@ appears on the left side of the page.
 
     #menu .pure-menu li {
         margin: 0 0 6px 0;
-        font-size: 12px;
+        font-size: 14px;
     }
 
     /*
@@ -223,7 +223,10 @@ small screens.
 /*
 Hides the menu at `48em`, but modify this based on your app's needs.
 */
-@media (min-width: 48em) {
+
+/* Modified 37.5em (600px)  */
+
+@media (min-width: 37.5em) {
 
     .header,
     .content {
@@ -232,25 +235,25 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     }
 
     #layout {
-        padding-left: 352px; /* left col width "#menu" */
+        padding-left: 382px; /* left col width "#menu" */
         left: 0;
     }
     #menu {
-        left: 352px;
+        left: 382px;
     }
 
     .menu-link {
         position: fixed;
-        left: 352px;
+        left: 382px;
         display: none;
     }
 
     #layout.active .menu-link {
-        /*left: 352px;*/
+        /*left: 382px;*/
     }
 }
 
-@media (max-width: 48em) {
+@media (max-width: 37.5em) {
     /* Only apply this when the window is small. Otherwise, the following
     case results in extra padding on the left:
         * Make the window small.
@@ -259,7 +262,7 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     */
     #layout.active {
         position: relative;
-        /*left: 352px;*/
+        /*left: 382px;*/
     }
     #menu {
         background: rgba(35,35,35,0.5);

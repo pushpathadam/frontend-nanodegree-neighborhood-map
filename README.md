@@ -23,6 +23,15 @@ Load index.html from a web-browser.
 Setup git in your project folder. The contents that would be normally in /node-module are not included in this repository. They worked but
 ballooned to over a 1000 files?
 
+## Gulp tasks
+
+uglify: uglify app.js and key.js files
+jsmove: move already minified library files from src to dist
+minifyCSS: minify my local css files and move these versions to dist
+imagemove: copy icons files to dist
+minifyhtml: minify my html files
+
+
 ## References & Resources
 
 Style Guide

@@ -1,6 +1,6 @@
 #don't want to commit api keys
-keys.js
 old-app.js
 old-*
 *.ai
 node_modules/*
+dist/*
