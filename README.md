@@ -7,7 +7,11 @@ The project current mashes up Google Places results with Yelp reviews. A stumbli
 
 
 ## Steps to Run the Application
-Download the repository from github.
+
+The easy way, load:
+http://pushpathadam.github.io/frontend-nanodegree-neighborhood-map/
+
+or  Download the repository from github.
 
 Setup git in your project folder. Run gulp all. It will run these tasks:
     uglify: uglify app.js and key.js files
@@ -17,11 +21,7 @@ Setup git in your project folder. Run gulp all. It will run these tasks:
     minifyhtml: minify my html files
     Load dist/index.html
 
-## Gulp tasks
-
-
-
-
+#
 ## References & Resources
 
 Style Guide
