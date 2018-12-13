@@ -225,8 +225,9 @@ Hides the menu at `48em`, but modify this based on your app's needs.
 */
 
 /* Modified 37.5em (600px)  */
+/* Modified to use device width to trap retina type screens */
 
-@media (min-width: 37.5em) {
+@media only screen and (min-device-width: 640px) {
 
     .header,
     .content {
@@ -253,7 +254,8 @@ Hides the menu at `48em`, but modify this based on your app's needs.
     }
 }
 
-@media (max-width: 37.5em) {
+/* modified from 37.5 em */
+@media only screen and (max-device-width: 640px){
     /* Only apply this when the window is small. Otherwise, the following
     case results in extra padding on the left:
         * Make the window small.

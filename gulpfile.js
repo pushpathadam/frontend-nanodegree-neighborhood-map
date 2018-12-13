@@ -10,8 +10,10 @@ var paths = {
     content: ['src/index.html']
 }
 gulp.task('uglify', function(){
-	gulp.src(paths.scripts[0])
-		.pipe(uglify())
+	return gulp.src(paths.scripts[0])
+		.pipe(uglify()).on('error', function(e){
+            console.log(e);
+         })
 		.pipe(gulp.dest('dist/js/'));
 });
 gulp.task('jsmove', function(){
@@ -19,8 +21,10 @@ gulp.task('jsmove', function(){
 		.pipe(gulp.dest('dist/js/lib/'));
 });
 gulp.task('minifyCSS', function(){
-	gulp.src(paths.styles[0])
-		.pipe(minifyCSS())
+	return gulp.src(paths.styles[0])
+		.pipe(minifyCSS()).on('error', function(e){
+            console.log(e);
+         })
 		.pipe(gulp.dest('dist/css/'));
 });
 gulp.task('imagemove', function(){
@@ -28,8 +32,10 @@ gulp.task('imagemove', function(){
 		.pipe(gulp.dest('dist/img/'));
 });
 gulp.task('minifyhtml', function(){
-	gulp.src(paths.content[0])
-		.pipe(minifyhtml())
+	return gulp.src(paths.content[0])
+		.pipe(minifyhtml()).on('error', function(e){
+            console.log(e);
+         })
 		.pipe(gulp.dest('dist/'));
 });
 gulp.task('default', function() {
