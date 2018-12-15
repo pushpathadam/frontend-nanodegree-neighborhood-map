@@ -41,4 +41,5 @@ gulp.task('minifyhtml', function(){
 gulp.task('default', function() {
   // place code for your default task here
 });
-gulp.task("all",['uglify','jsmove','minifyCSS','imagemove','minifyhtml']);
+// gulp.task("all",['uglify','jsmove','minifyCSS','imagemove','minifyhtml']);
+gulp.task("all",gulp.series('uglify','jsmove','minifyCSS','imagemove','minifyhtml'));
