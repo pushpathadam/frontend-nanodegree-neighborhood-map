@@ -4,6 +4,8 @@
   "description": "udacity project 5",
   "main": "gulpfile.js",
   "dependencies": {
+    "async": "^2.6.2",
+    "async-once": "^1.0.1",
     "gulp": "^4.0.0",
     "gulp-minify-css": "^1.2.1",
     "gulp-minify-html": "^1.0.4",
