@@ -9,7 +9,7 @@ The project current mashes up Google Places results with Yelp reviews. A stumbli
 ## Steps to Run the Application
 
 The easy way, load:
-http://pushpathadam.github.io/frontend-nanodegree-neighborhood-map/
+https://pushpathadam.github.io/frontend-nanodegree-neighborhood-map/
 
 or  Download the repository from github.
 
